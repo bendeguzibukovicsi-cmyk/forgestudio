@@ -668,7 +668,7 @@ function selectGame(option) {
     }
 }
 
-gameSearch.addEventListener('input', filterGames);
+gameSearch.addEventListener('input', debounce(filterGames, 150));
 gameSearch.addEventListener('focus', filterGames);
 gameSearch.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
@@ -712,6 +712,19 @@ document.addEventListener('pointerdown', (event) => {
 gameSearch.addEventListener('focusout', (event) => {
     if (event.relatedTarget && !event.relatedTarget.closest('.game-search')) closeGameSuggestions();
 });
+
+// Debounce utility for performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 document.querySelector('#budget').addEventListener('input', () => {
     result.hidden = true;
 });
