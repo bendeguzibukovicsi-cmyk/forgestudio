@@ -1137,12 +1137,82 @@ document.addEventListener('keydown', (e) => {
 console.log('✅ Smart Suggestion Engine aktív - Ctrl+Enter = Submit, Ctrl+R = Reset');
 
 // Live Preview Panel
+function calculateTotalCost() {
+    const platform = form.elements.platform.value;
+    const monitor = monitorSelect ? monitorSelect.value : 'none';
+    const budget = Number(document.querySelector('#budget').value) || 0;
+    
+    let costs = {
+        hardware: 0,
+        monitor: 0,
+        peripherals: 0,
+        storage: 0,
+        total: 0
+    };
+    
+    // Calculate hardware cost
+    if (platform === 'work') {
+        costs.hardware = budget;
+    } else if (platform === 'console') {
+        const console = consoleSelect.selectedOptions[0];
+        costs.hardware = consoleBudgetGuides[console?.value] || 0;
+    } else {
+        // PC gaming
+        const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
+        const resolution = document.querySelector('#resolution') ? document.querySelector('#resolution').value : '1080';
+        const resolutionLevel = { '1080': 0, '1440': 1, '4k': 2 }[resolution];
+        const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
+        const build = builds[level];
+        costs.hardware = build ? build.price : 0;
+    }
+    
+    // Calculate monitor cost
+    if (monitor !== 'none') {
+        costs.monitor = monitorPrices[monitor]?.avg || 0;
+    }
+    
+    // Calculate peripherals (default gaming peripherals)
+    // Egér (Gaming Mouse): 20-30k Ft (avg 25k)
+    // Billentyűzet (Mechanical): 20-35k Ft (avg 27.5k)
+    // Fej (Headset): 30-70k Ft (avg 50k)
+    // Egérpad (Mousepad): 10-15k Ft (avg 12.5k)
+    // Gaming szék: 150-300k Ft (avg 225k)
+    const defaultPeripherals = {
+        mouse: 25000,
+        keyboard: 27500,
+        headset: 50000,
+        mousepad: 12500,
+        chair: 225000
+    };
+    
+    Object.values(defaultPeripherals).forEach(price => {
+        costs.peripherals += price;
+    });
+    
+    // Calculate storage cost (optional SSD upgrade)
+    if (platform === 'console') {
+        const withStorage = document.querySelector('#storage') ? document.querySelector('#storage').value === 'ssd' : false;
+        if (withStorage) {
+            // Storage expansion for console (microSD, SSD, etc.)
+            costs.storage = 50000; // 500GB-1TB microSD vagy external
+        }
+    }
+    
+    // Calculate total
+    costs.total = costs.hardware + costs.monitor + costs.peripherals + costs.storage;
+    
+    return costs;
+}
+
 function updatePreview() {
     const platform = form.elements.platform.value;
     const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
     const budget = Number(document.querySelector('#budget').value) || 0;
     const monitor = monitorSelect ? monitorSelect.value : 'none';
     const resolution = document.querySelector('#resolution') ? document.querySelector('#resolution').value : '1080';
+    
+    // Calculate all costs
+    const costs = calculateTotalCost();
     
     if (platform === 'work') {
         // Work preview
@@ -1159,18 +1229,17 @@ function updatePreview() {
         
         previewStatus.textContent = `${profiles.length} fejlesztési terület kiválasztva`;
         const specs = [`Terület: ${profiles.join(', ')}`];
-        if (budget > 0) specs.push(`Költségvetés: ${budget.toLocaleString('hu-HU')} Ft`);
+        if (budget > 0) specs.push(`💻 PC: ${budget.toLocaleString('hu-HU')} Ft`);
         
-        let totalPrice = 0;
         if (monitor !== 'none') {
-            const monitorPrice = monitorPrices[monitor]?.avg || 0;
-            specs.push(`Monitor: ${getMonitorName(monitor)}`);
-            totalPrice = budget + monitorPrice;
-        } else {
-            totalPrice = budget;
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
         }
         
-        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák (egér, billentyűzet, fej, stb.): ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
     } else if (platform === 'console') {
         // Console preview
         const console = consoleSelect.selectedOptions[0];
@@ -1179,21 +1248,25 @@ function updatePreview() {
             return;
         }
         
-        const consolePrice = consoleBudgetGuides[console.value] || 0;
         previewStatus.textContent = `Konzol kiválasztva`;
         const specs = [
-            `Modell: ${console.value}`,
-            `Konzol ár: ~${consolePrice.toLocaleString('hu-HU')} Ft`
+            `🎮 Konzol: ${console.value}`,
+            `💰 Konzol ár: ~${costs.hardware.toLocaleString('hu-HU')} Ft`
         ];
         
-        let totalPrice = consolePrice;
         if (monitor !== 'none') {
-            const monitorPrice = monitorPrices[monitor]?.avg || 0;
-            specs.push(`Monitor: ${getMonitorName(monitor)} (~${monitorPrice.toLocaleString('hu-HU')} Ft)`);
-            totalPrice += monitorPrice;
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
         }
         
-        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
+        if (costs.storage > 0) {
+            specs.push(`💾 Tárhely bővítés: ~${costs.storage.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák: ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
     } else {
         // PC gaming preview
         if (selectedGames.length === 0) {
@@ -1207,21 +1280,24 @@ function updatePreview() {
         const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
         const build = builds[level];
         
-        let totalPrice = build.price;
         const specs = [
-            `Build: ${build.name}`,
-            `PC ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
-            `Játékok (${selectedGames.length}): ${selectedGames.slice(0, 3).join(', ')}${selectedGames.length > 3 ? ` +${selectedGames.length - 3}` : ''}`,
-            `Felbontás: ${resolution}p`
+            `🖥️ Build: ${build.name}`,
+            `💻 PC ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
+            `🎮 Játékok (${selectedGames.length}): ${selectedGames.slice(0, 3).join(', ')}${selectedGames.length > 3 ? ` +${selectedGames.length - 3}` : ''}`,
+            `📺 Felbontás: ${resolution}p`
         ];
         
         if (monitor !== 'none') {
-            const monitorPrice = monitorPrices[monitor]?.avg || 0;
-            specs.push(`Monitor: ${getMonitorName(monitor)} (~${monitorPrice.toLocaleString('hu-HU')} Ft)`);
-            totalPrice += monitorPrice;
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
         }
         
-        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák (egér, billentyűzet, fej, egérpad): ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        specs.push(`🪑 Gaming szék: ~225 000 Ft (ajánlott)`);
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
     }
 }
 
