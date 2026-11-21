@@ -1117,9 +1117,17 @@ function updatePreview() {
         previewStatus.textContent = `${profiles.length} fejlesztési terület kiválasztva`;
         const specs = [`Terület: ${profiles.join(', ')}`];
         if (budget > 0) specs.push(`Költségvetés: ${budget.toLocaleString('hu-HU')} Ft`);
-        if (monitor !== 'none') specs.push(`Monitor: ${getMonitorName(monitor)}`);
         
-        renderPreviewSpecs(specs);
+        let totalPrice = 0;
+        if (monitor !== 'none') {
+            const monitorPrice = monitorPrices[monitor]?.avg || 0;
+            specs.push(`Monitor: ${getMonitorName(monitor)}`);
+            totalPrice = budget + monitorPrice;
+        } else {
+            totalPrice = budget;
+        }
+        
+        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
     } else if (platform === 'console') {
         // Console preview
         const console = consoleSelect.selectedOptions[0];
@@ -1128,14 +1136,21 @@ function updatePreview() {
             return;
         }
         
+        const consolePrice = consoleBudgetGuides[console.value] || 0;
         previewStatus.textContent = `Konzol kiválasztva`;
         const specs = [
             `Modell: ${console.value}`,
-            `Ár: ~${consoleBudgetGuides[console.value]?.toLocaleString('hu-HU') || 'N/A'} Ft`
+            `Konzol ár: ~${consolePrice.toLocaleString('hu-HU')} Ft`
         ];
-        if (monitor !== 'none') specs.push(`Monitor: ${getMonitorName(monitor)}`);
         
-        renderPreviewSpecs(specs);
+        let totalPrice = consolePrice;
+        if (monitor !== 'none') {
+            const monitorPrice = monitorPrices[monitor]?.avg || 0;
+            specs.push(`Monitor: ${getMonitorName(monitor)} (~${monitorPrice.toLocaleString('hu-HU')} Ft)`);
+            totalPrice += monitorPrice;
+        }
+        
+        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
     } else {
         // PC gaming preview
         if (selectedGames.length === 0) {
@@ -1149,19 +1164,21 @@ function updatePreview() {
         const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
         const build = builds[level];
         
+        let totalPrice = build.price;
         const specs = [
             `Build: ${build.name}`,
-            `Alap ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
-            `Játékok: ${selectedGames.join(', ')}`,
+            `PC ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
+            `Játékok (${selectedGames.length}): ${selectedGames.slice(0, 3).join(', ')}${selectedGames.length > 3 ? ` +${selectedGames.length - 3}` : ''}`,
             `Felbontás: ${resolution}p`
         ];
         
         if (monitor !== 'none') {
             const monitorPrice = monitorPrices[monitor]?.avg || 0;
             specs.push(`Monitor: ${getMonitorName(monitor)} (~${monitorPrice.toLocaleString('hu-HU')} Ft)`);
+            totalPrice += monitorPrice;
         }
         
-        renderPreviewSpecs(specs, build.price);
+        renderPreviewSpecs(specs, totalPrice, 'Végösszesen');
     }
 }
 
@@ -1177,16 +1194,19 @@ function renderPreviewPlaceholder() {
     `;
 }
 
-function renderPreviewSpecs(specs, basePrice = 0) {
+function renderPreviewSpecs(specs, totalPrice = 0, priceLabel = 'Becsült ár') {
     previewContent.innerHTML = specs
         .map(spec => `
             <div class="preview-spec-item">
                 <span class="preview-spec-value">${spec}</span>
             </div>
-        `).join('') + (basePrice > 0 ? `
+        `).join('') + (totalPrice > 0 ? `
             <div class="preview-price">
-                <span class="preview-price-label">Becsült alap ár</span>
-                <div class="preview-price-value">${basePrice.toLocaleString('hu-HU')} Ft</div>
+                <span class="preview-price-label">${priceLabel}</span>
+                <div class="preview-price-value">${totalPrice.toLocaleString('hu-HU')} Ft</div>
+                <small style="color: var(--muted); font-size: 11px; margin-top: 6px; display: block;">
+                    (Eszközök + Monitor, ha kiválasztott)
+                </small>
             </div>
         ` : '');
 }
