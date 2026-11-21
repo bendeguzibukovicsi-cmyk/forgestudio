@@ -906,6 +906,12 @@ form.addEventListener('submit', (event) => {
         result.append(note);
     }
     addRecommendedSet(result, platform, selectedResolution, consoleSelect.selectedOptions[0], selectedGames);
+    
+    // Add advanced features section
+    if (typeof ForgeStudioFeatures !== 'undefined') {
+        addAdvancedFeatures(result, platform, estimatedPrice, selectedGames);
+    }
+    
     const disclaimer = document.createElement('p');
     disclaimer.className = 'result-note';
     disclaimer.textContent = 'A PC-ajánlás előre összeállított példa, főként a felbontás alapján; a legtöbb játékhoz még nincs ellenőrzött gépigény. Nem garantáljuk, hogy a választott játék elérhető vagy megfelelően fut a kiválasztott platformon: ellenőrizd a kiadónál a megjelenést, támogatást és gépigényt. Az árak hozzávetőleges becslések, nem élő bolti árak. A linkek keresésre vezetnek; vásárlás előtt ellenőrizd az árat, készletet és kompatibilitást. A PC ár nem tartalmaz monitort, perifériákat, operációs rendszert vagy összeszerelést.';
