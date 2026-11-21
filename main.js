@@ -1233,6 +1233,169 @@ function getMonitorName(value) {
     return names[value] || value;
 }
 
+// Advanced Features Section
+function addAdvancedFeatures(resultElement, platform, price, selectedGames = []) {
+    if (!window.ForgeStudioFeatures) return;
+    
+    const features = window.ForgeStudioFeatures;
+    
+    const section = document.createElement('details');
+    section.className = 'advanced-features-section';
+    section.open = false;
+    
+    const summary = document.createElement('summary');
+    summary.innerHTML = '<strong>🚀 Haladó funkciók & Teljesítmény Info</strong>';
+    section.append(summary);
+    
+    // 1. Performance section
+    const perfSection = document.createElement('div');
+    perfSection.className = 'feature-group';
+    
+    const perfTitle = document.createElement('h4');
+    perfTitle.textContent = '⚡ Teljesítmény Előrejelzés';
+    perfSection.append(perfTitle);
+    
+    const perfContent = document.createElement('div');
+    perfContent.className = 'feature-content';
+    
+    const gpuName = 'RX 7700 XT'; // Example GPU
+    const performance = features.performance.predictPerformance(gpuName, '1440p');
+    
+    perfContent.innerHTML = `
+        <ul>
+            <li><strong>Becsült FPS:</strong> ${performance.fps}+ FPS (1440p)</li>
+            <li><strong>Ajánlott beállítások:</strong> ${performance.settings}</li>
+            <li><strong>Bottleneck:</strong> ${performance.bottleneck}</li>
+        </ul>
+    `;
+    perfSection.append(perfContent);
+    section.append(perfSection);
+    
+    // 2. Budget category section
+    const budgetSection = document.createElement('div');
+    budgetSection.className = 'feature-group';
+    
+    const budgetTitle = document.createElement('h4');
+    budgetTitle.textContent = '💰 Költségvetési Kategória';
+    budgetSection.append(budgetTitle);
+    
+    const budgetData = features.budget.categorizeBudget(price);
+    const budgetContent = document.createElement('div');
+    budgetContent.className = 'feature-content';
+    budgetContent.innerHTML = `
+        <p><strong>${budgetData.tier}</strong></p>
+        <ul>
+            <li>Ajánlott játékok: ${budgetData.games}</li>
+            <li>FPS tartomány: ${budgetData.fps}</li>
+        </ul>
+    `;
+    budgetSection.append(budgetContent);
+    section.append(budgetSection);
+    
+    // 3. Display recommendations
+    const dispSection = document.createElement('div');
+    dispSection.className = 'feature-group';
+    
+    const dispTitle = document.createElement('h4');
+    dispTitle.textContent = '🖥️ Képernyő Ajánlások';
+    dispSection.append(dispTitle);
+    
+    const dispContent = document.createElement('div');
+    dispContent.className = 'feature-content';
+    dispContent.innerHTML = `
+        <ul>
+            <li><strong>1440p Gaming:</strong> 27" IPS, 165-240Hz, 1ms response</li>
+            <li><strong>Ár tartomány:</strong> 250-500k Ft</li>
+            <li><strong>Best For:</strong> Mixed Gaming & Streaming</li>
+        </ul>
+    `;
+    dispSection.append(dispContent);
+    section.append(dispSection);
+    
+    // 4. Maintenance tips
+    const maintSection = document.createElement('div');
+    maintSection.className = 'feature-group';
+    
+    const maintTitle = document.createElement('h4');
+    maintTitle.textContent = '🔧 Karbantartás & Legújabbítás';
+    maintSection.append(maintTitle);
+    
+    const maintContent = document.createElement('div');
+    maintContent.className = 'feature-content';
+    maintContent.innerHTML = `
+        <ul>
+            <li><strong>Portalanítás:</strong> 3-6 havonta (15-30 perc)</li>
+            <li><strong>Hővezetékpaszta csere:</strong> 2-3 évenként (30-45 perc)</li>
+            <li><strong>Driver frissítés:</strong> Havonta (10-15 perc)</li>
+            <li><strong>Biztonsági mentés:</strong> Hetente (Automatikus)</li>
+        </ul>
+    `;
+    maintSection.append(maintContent);
+    section.append(maintSection);
+    
+    // 5. Future proofing
+    const futureSection = document.createElement('div');
+    futureSection.className = 'feature-group';
+    
+    const futureTitle = document.createElement('h4');
+    futureTitle.textContent = '🚀 Jövő-kompatibilitás';
+    futureSection.append(futureTitle);
+    
+    const futureData = features.future.assessFutureProofing('high', '1440p');
+    const futureContent = document.createElement('div');
+    futureContent.className = 'feature-content';
+    futureContent.innerHTML = `
+        <p><strong>Élettartam:</strong> ${futureData.score}</p>
+        <p>${futureData.prediction}</p>
+    `;
+    futureSection.append(futureContent);
+    section.append(futureSection);
+    
+    // 6. Gaming profiles
+    const profileSection = document.createElement('div');
+    profileSection.className = 'feature-group';
+    
+    const profileTitle = document.createElement('h4');
+    profileTitle.textContent = '🎮 Játékos Profilok';
+    profileSection.append(profileTitle);
+    
+    const profileContent = document.createElement('div');
+    profileContent.className = 'feature-content';
+    profileContent.innerHTML = `
+        <ul>
+            <li><strong>Casual:</strong> 60 FPS, Medium settings, 300-400k Ft</li>
+            <li><strong>Competitive E-Sports:</strong> 240+ FPS, Low settings, 600k-1M Ft</li>
+            <li><strong>Hardcore Ultra:</strong> 60 FPS, Maximum+Ray Tracing, 1-2M Ft+</li>
+        </ul>
+    `;
+    profileSection.append(profileContent);
+    section.append(profileSection);
+    
+    // 7. Peripherals
+    const periSection = document.createElement('div');
+    periSection.className = 'feature-group';
+    
+    const periTitle = document.createElement('h4');
+    periTitle.textContent = '🖱️ Periféria Ajánlások';
+    periSection.append(periTitle);
+    
+    const periContent = document.createElement('div');
+    periContent.className = 'feature-content';
+    periContent.innerHTML = `
+        <strong>Gaming eszközök:</strong>
+        <ul>
+            <li>Egér: Gaming Mouse (20k-15k Ft, 12800+ DPI)</li>
+            <li>Billentyűzet: Mechanical (15k-40k Ft, Hot-swap)</li>
+            <li>Fejhallgató: Gaming Headset (25k-80k Ft, 7.1 Virtual)</li>
+            <li>Egérpad: 90x40cm Large Mousepad (10k-20k Ft)</li>
+        </ul>
+    `;
+    periSection.append(periContent);
+    section.append(periSection);
+    
+    resultElement.append(section);
+}
+
 // Update preview on form changes
 form.addEventListener('change', updatePreview);
 document.querySelector('#budget')?.addEventListener('input', updatePreview);
@@ -1240,3 +1403,4 @@ monitorSelect?.addEventListener('change', updatePreview);
 document.querySelector('#resolution')?.addEventListener('change', updatePreview);
 
 console.log('✅ Live Preview Panel: Aktív');
+console.log('✅ Advanced Features Module: Aktív');
