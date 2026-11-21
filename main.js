@@ -892,26 +892,53 @@ form.addEventListener('submit', (event) => {
         `${description} Választott játékok: ${selectedGames.join(', ')}.`,
         `${translate(description)} Selected games: ${selectedGames.join(', ')}.`
     );
+    
+    // Calculate all costs for detailed price breakdown
+    const costs = calculateTotalCost();
+    
     const price = document.createElement('p');
     const monitorType = monitorSelect.value;
-    let monitorEstimate = '';
-    if (monitorType !== 'none' && monitorPrices[monitorType]) {
-        const monitorPrice = monitorPrices[monitorType];
-        monitorEstimate = bilingual(
-            ` + Monitor: kb. ${monitorPrice.avg.toLocaleString('hu-HU')} Ft (${monitorPrice.min.toLocaleString('hu-HU')}–${monitorPrice.max.toLocaleString('hu-HU')} Ft)`,
-            ` + Monitor: approx. ${monitorPrice.avg.toLocaleString('en-US')} Ft (${monitorPrice.min.toLocaleString('en-US')}–${monitorPrice.max.toLocaleString('en-US')} Ft)`
-        );
+    
+    // Detailed price breakdown
+    let priceBreakdown = `
+        <div style="background: rgba(82, 183, 136, 0.1); padding: 12px; border-radius: 8px; margin: 10px 0;">
+            <strong style="color: #52b788;">💰 Teljes költségvetés (minden beleértve):</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 13px;">
+                <div>💻 PC/Hardware: <strong>${costs.hardware.toLocaleString('hu-HU')} Ft</strong></div>
+    `;
+    
+    if (costs.monitor > 0) {
+        priceBreakdown += `<div>🖥️ Monitor: <strong>${costs.monitor.toLocaleString('hu-HU')} Ft</strong></div>`;
     }
-    price.textContent = estimatedPrice
+    
+    if (costs.peripherals > 0) {
+        priceBreakdown += `<div>🖱️ Perifériák: <strong>${costs.peripherals.toLocaleString('hu-HU')} Ft</strong></div>`;
+    }
+    
+    if (costs.storage > 0) {
+        priceBreakdown += `<div>💾 Tárhely: <strong>${costs.storage.toLocaleString('hu-HU')} Ft</strong></div>`;
+    }
+    
+    priceBreakdown += `
+            </div>
+            <div style="border-top: 1px solid rgba(82, 183, 136, 0.3); margin-top: 8px; padding-top: 8px; font-size: 14px;">
+                <strong style="color: #52b788;">ÖSSZESEN: ${costs.total.toLocaleString('hu-HU')} Ft</strong>
+            </div>
+        </div>
+    `;
+    
+    price.innerHTML = estimatedPrice
         ? bilingual(
-            `Az alapgép korábbi tájékoztató becslése: kb. ${estimatedPrice.toLocaleString('hu-HU')} Ft; a választott modellek ára eltérhet.${monitorEstimate}`,
-            `Previous indicative estimate for the base PC: approximately ${estimatedPrice.toLocaleString('en-US')} Ft; selected component prices may vary.${monitorEstimate}`
+            `Az alapgép korábbi tájékoztató becslése: kb. ${estimatedPrice.toLocaleString('hu-HU')} Ft; a választott modellek ára eltérhet.`,
+            `Previous indicative estimate for the base PC: approximately ${estimatedPrice.toLocaleString('en-US')} Ft; selected component prices may vary.`
         )
         : 'A kiválasztott modellhez nincs pontos árbecslés; ellenőrizd a bolti ajánlatokat.';
+    
+    price.innerHTML += priceBreakdown;
     result.append(eyebrow, heading, intro, price);
 
     if (platform === 'pc') {
-        if (estimatedPrice !== undefined) addBudgetWarning(result, budget, estimatedPrice, 'a javasolt PC');
+        if (estimatedPrice !== undefined) addBudgetWarning(result, budget, costs.total, 'a teljes ajánlott rendszer (PC + Monitor + Perifériák)');
     } else {
         const guide = consoleBudgetGuides[title];
         if (guide === undefined) {
@@ -920,12 +947,12 @@ form.addEventListener('submit', (event) => {
             note.textContent = 'Ehhez a modellhez nincs kerettámpont; ellenőrizd a bolti árakat.';
             result.append(note);
         } else {
-            addBudgetWarning(result, budget, guide, 'a kiválasztott konzol vagy kézi PC');
+            addBudgetWarning(result, budget, costs.total, 'a teljes ajánlott rendszer (Konzol + Monitor + Perifériák)');
         }
         if (withStorage) {
             const note = document.createElement('p');
             note.className = 'result-note';
-            note.textContent = 'A keret ellenőrzése csak a konzolra vonatkozik; a kiválasztott tárhelybővítés ára nincs benne, külön ellenőrizd.';
+            note.textContent = 'A tárhelybővítés ára már benne van az összesítésben.';
             result.append(note);
         }
     }
