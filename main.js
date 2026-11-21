@@ -580,10 +580,10 @@ function closeGameSuggestions() {
 function filterGames() {
     const query = gameSearch.value.trim().toLocaleLowerCase('hu');
     
-    // Render cards based on search query
+    // Render cards based on search query - this populates gameIndexMap
     renderGameCards(query);
     
-    // Get newly rendered cards
+    // Get newly rendered cards - all of them are now what we need to filter
     const gameCards = [...gameGrid.querySelectorAll('.game-card')];
     
     let matches = 0;
@@ -591,32 +591,40 @@ function filterGames() {
     gameSuggestions.replaceChildren();
     activeSuggestion = -1;
     gameSearch.removeAttribute('aria-activedescendant');
-    gameCards.forEach((card, index) => {
+    
+    // Iterate through rendered cards
+    gameCards.forEach((card, displayIndex) => {
         const input = card.querySelector('input');
         const checked = input.checked;
         const name = input.value.toLocaleLowerCase('hu');
+        
+        // Smart aliases for better search
         const gtaAlias = name.replace(/^grand theft auto/, 'gta')
             .replace(/^gta vi\b/, 'gta 6')
             .replace(/^gta v\b/, 'gta 5')
             .replace(/^gta iv\b/, 'gta 4')
             .replace(/^gta iii\b/, 'gta 3');
+        
         const aliases = [
             rockstarNames.has(input.value) ? 'rockstar games' : '',
             name.startsWith('grand theft auto') ? gtaAlias : '',
             name.startsWith('red dead') ? name.replace('red dead redemption', 'rdr') : '',
             name === 'red dead redemption 2' ? 'rdr2' : ''
         ];
+        
         const matchesQuery = Boolean(query) && (name.includes(query) || aliases.some((alias) => alias.includes(query)));
+        
         if (checked) selected++;
+        
         if (matchesQuery) {
             matches++;
             if (!checked) {
                 const option = document.createElement('div');
-                option.id = `game-option-${index}`;
+                option.id = `game-option-${displayIndex}`;
                 option.className = 'game-suggestion';
                 option.setAttribute('role', 'option');
                 option.setAttribute('aria-selected', 'false');
-                option.dataset.index = index;
+                option.dataset.gameName = name; // Use game name instead of index
                 const title = document.createElement('strong');
                 title.textContent = input.value;
                 const category = document.createElement('span');
@@ -625,8 +633,10 @@ function filterGames() {
                 gameSuggestions.append(option);
             }
         }
-        card.hidden = !checked;
+        // Show only checked or when query is active and matches
+        card.hidden = !(checked || (query && matchesQuery));
     });
+    
     if (query && !gameSuggestions.children.length) {
         const empty = document.createElement('div');
         empty.className = 'game-suggestion-empty';
@@ -635,22 +645,27 @@ function filterGames() {
             : bilingual('Nincs találat.', 'No results.');
         gameSuggestions.append(empty);
     }
+    
     gameSuggestions.hidden = !query;
     gameSearch.setAttribute('aria-expanded', String(Boolean(query)));
     localizeTree(gameSuggestions);
+    
     document.querySelector('#game-count').textContent = query
         ? bilingual(`${matches} találat · ${selected} kiválasztva`, `${matches} results · ${selected} selected`)
         : bilingual(`${selected} kiválasztva`, `${selected} selected`);
 }
 
 function selectGame(option) {
-    const gameCards = [...gameGrid.querySelectorAll('.game-card')];
-    const input = gameCards[Number(option.dataset.index)].querySelector('input');
-    input.checked = true;
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-    gameSearch.value = '';
-    filterGames();
-    gameSearch.focus();
+    const gameName = option.dataset.gameName;
+    // Find the input by game name instead of index
+    const input = gameGrid.querySelector(`input[value="${gameName}"]`);
+    if (input) {
+        input.checked = true;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        gameSearch.value = '';
+        filterGames();
+        gameSearch.focus();
+    }
 }
 
 gameSearch.addEventListener('input', filterGames);
