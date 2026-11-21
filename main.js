@@ -223,11 +223,24 @@ Object.entries(consoleGroups).forEach(([group, names]) => {
     });
     consoleSelect.append(options);
 });
-localizeTree(gameGrid);
-localizeTree(consoleSelect);
-consoleSelect.querySelectorAll('optgroup').forEach((group) => {
-    group.label = translate(group.label);
-});
+
+// Initialize localization only when DOM and translation functions are ready
+function initializeLocalization() {
+    if (typeof localizeTree === 'function' && typeof translate === 'function') {
+        localizeTree(gameGrid);
+        localizeTree(consoleSelect);
+        consoleSelect.querySelectorAll('optgroup').forEach((group) => {
+            group.label = translate(group.label);
+        });
+    }
+}
+
+// Wait for all scripts to load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeLocalization);
+} else {
+    initializeLocalization();
+}
 
 function shoppingLink(query) {
     const link = document.createElement('a');
