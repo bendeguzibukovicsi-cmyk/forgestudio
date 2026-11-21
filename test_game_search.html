@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForgeStudio - Game Search Test</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <style>
+        body { background: #0a0e27; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        h1 { color: #00d4ff; }
+        .test-info { margin: 20px 0; padding: 15px; background: #1e1e1e; border-left: 4px solid #00d4ff; border-radius: 8px; }
+        .success { color: #00ff88; }
+        .instruction { background: #2d2d3d; padding: 15px; border-radius: 8px; margin: 10px 0; }
+        code { background: #1a1a1a; padding: 2px 6px; border-radius: 3px; color: #00ff88; }
+    </style>
+    
+    <h1>🎮 ForgeStudio - Game Search Autocomplete Test</h1>
+    
+    <div class="test-info">
+        <h2>📋 What's New</h2>
+        <ul>
+            <li><strong class="success">✅ Empty Grid by Default:</strong> No games shown until you search</li>
+            <li><strong class="success">✅ Autocomplete Search:</strong> Type to find games (like Google)</li>
+            <li><strong class="success">✅ Real-time Suggestions:</strong> Dropdown shows matching games</li>
+            <li><strong class="success">✅ Persist Selection:</strong> Selected games stay visible</li>
+        </ul>
+    </div>
+    
+    <div class="test-info">
+        <h2>🧪 Testing Instructions</h2>
+        <div class="instruction">
+            <strong>1. Test Empty State</strong><br>
+            Go to game selection step - you should see empty grid with hint:<br>
+            <code>🔍 Kezdj el gépelni a játék nevét...</code>
+        </div>
+        
+        <div class="instruction">
+            <strong>2. Test Autocomplete</strong><br>
+            Click search box and type:<br>
+            • <code>gta</code> - Shows GTA games<br>
+            • <code>minecraft</code> - Shows Minecraft<br>
+            • <code>cyber</code> - Shows Cyberpunk<br>
+        </div>
+        
+        <div class="instruction">
+            <strong>3. Test Selection Persistence</strong><br>
+            • Select a game by clicking it<br>
+            • Clear the search box<br>
+            • Game should still be visible (checked)<br>
+        </div>
+        
+        <div class="instruction">
+            <strong>4. Test Multiple Selections</strong><br>
+            • Search for "gta", select one<br>
+            • Search for "minecraft", select one<br>
+            • Both should remain selected even when searching
+        </div>
+    </div>
+    
+    <div class="test-info">
+        <h2>🔧 Technical Changes</h2>
+        <ul>
+            <li><strong>filterGames():</strong> Now checks if search text is empty</li>
+            <li><strong>renderGameCards():</strong> Shows only matches + selected games</li>
+            <li><strong>CSS hint:</strong> Empty grid displays helpful text</li>
+            <li><strong>Performance:</strong> Debounced search (150ms)</li>
+        </ul>
+    </div>
+    
+    <div class="test-info">
+        <h2>📊 Code Changes Summary</h2>
+        <ul>
+            <li>main.js: +20 lines (new filter logic)</li>
+            <li>main.css: +11 lines (empty state hint)</li>
+            <li>No breaking changes</li>
+            <li>Backward compatible</li>
+        </ul>
+    </div>
+    
+    <div class="test-info">
+        <h2 class="success">✅ Status</h2>
+        <p>All changes are live on GitHub:</p>
+        <ul>
+            <li>Latest commit: <code>cf011b3</code> (2026-11-21 18:18:08)</li>
+            <li>Repository: <code>bendeguzibukovicsi-cmyk/forgestudio</code></li>
+            <li>Test server: <code>http://localhost:8000/main.html</code></li>
+        </ul>
+    </div>
+    
+    <div class="test-info">
+        <h2>🚀 Ready to Test!</h2>
+        <p>Go to <a href="/main.html" style="color: #00d4ff; text-decoration: underline;">ForgeStudio</a> and try the new game search feature.</p>
+    </div>
+</body>
+</html>
