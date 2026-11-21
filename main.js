@@ -1393,6 +1393,158 @@ function addAdvancedFeatures(resultElement, platform, price, selectedGames = [])
     periSection.append(periContent);
     section.append(periSection);
     
+    // 8. Gaming profiles - detailed
+    const advGameSection = document.createElement('div');
+    advGameSection.className = 'feature-group';
+    
+    const advGameTitle = document.createElement('h4');
+    advGameTitle.textContent = '🏆 Játékos Kategóriák & Ajánlások';
+    advGameSection.append(advGameTitle);
+    
+    const advGameContent = document.createElement('div');
+    advGameContent.className = 'feature-content';
+    advGameContent.innerHTML = `
+        <ul>
+            <li><strong>Casual Player:</strong> 60 FPS, Medium settings, Plotform: PC/Console, Költségvetés: 300-500k Ft</li>
+            <li><strong>Hardcore Gamer:</strong> 144+ FPS, High/Ultra, Platform: PC, Költségvetés: 1-2M Ft</li>
+            <li><strong>E-Sports Pro:</strong> 240+ FPS, Low Competitive Settings, Platform: PC, Költségvetés: 2-3M Ft</li>
+            <li><strong>Streamer:</strong> 60-120 FPS + Encoding, Platform: PC, Költségvetés: 1.5-3M Ft</li>
+            <li><strong>Content Creator:</strong> 4K+ Support, Ray Tracing, Platform: PC, Költségvetés: 2-5M Ft</li>
+        </ul>
+    `;
+    advGameSection.append(advGameContent);
+    section.append(advGameSection);
+    
+    // 9. VR & Advanced Features
+    const vrSection = document.createElement('div');
+    vrSection.className = 'feature-group';
+    
+    const vrTitle = document.createElement('h4');
+    vrTitle.textContent = '👓 VR Támogatás & Speciális Funkciók';
+    vrSection.append(vrTitle);
+    
+    const vrContent = document.createElement('div');
+    vrContent.className = 'feature-content';
+    vrContent.innerHTML = `
+        <ul>
+            <li><strong>VR Readiness:</strong> ${price >= 1000000 ? '✅ Teljes VR támogatás (Meta 3, PlayStation VR2)' : '⚠️ Alap VR támogatás (Meta Quest 3)'}</li>
+            <li><strong>Ray Tracing:</strong> ${price >= 800000 ? '✅ Teljes RT támogatás' : '⚠️ Korlátozott RT'}</li>
+            <li><strong>DLSS/FSR:</strong> ✅ NVIDIA/AMD upscaling támogatás</li>
+            <li><strong>Ultrawidescreen:</strong> ${price >= 1200000 ? '✅ Ajánlott (120Hz+, 5120x1440)' : '⚠️ Alap támogatás'}</li>
+        </ul>
+    `;
+    vrSection.append(vrContent);
+    section.append(vrSection);
+    
+    // 10. Power & Thermal Management
+    const powerSection = document.createElement('div');
+    powerSection.className = 'feature-group';
+    
+    const powerTitle = document.createElement('h4');
+    powerTitle.textContent = '⚡ Energiafogyasztás & Hűtés';
+    powerSection.append(powerTitle);
+    
+    const powerContent = document.createElement('div');
+    powerContent.className = 'feature-content';
+    powerContent.innerHTML = `
+        <ul>
+            <li><strong>Teljes TDP:</strong> 500-650W (Gaming), 1000W+ (Content Creation)</li>
+            <li><strong>PSU ajánlás:</strong> 650-850W Gold+ (Gaming), 1200W+ (Streaming/Rendering)</li>
+            <li><strong>Hűtésszükséglet:</strong> 120mm+ AIO vagy Noctua D15 Air-Cooler</li>
+            <li><strong>Max Hőmérséklet:</strong> CPU: 85°C, GPU: 80°C, NVMe: 70°C</li>
+            <li><strong>Áramköltség/év:</strong> ~15-25k Ft (8 óra/nap Gaming)</li>
+        </ul>
+    `;
+    powerSection.append(powerContent);
+    section.append(powerSection);
+    
+    // 11. Upgrade Path & Longevity
+    const upgradeSection = document.createElement('div');
+    upgradeSection.className = 'feature-group';
+    
+    const upgradeTitle = document.createElement('h4');
+    upgradeTitle.textContent = '📈 Fejlesztés & Élettartam';
+    upgradeSection.append(upgradeTitle);
+    
+    const upgradeContent = document.createElement('div');
+    upgradeContent.className = 'feature-content';
+    upgradeContent.innerHTML = `
+        <ul>
+            <li><strong>Ajánlott élettartam:</strong> 5-7 év (Gaming PC), 10+ év (Console)</li>
+            <li><strong>Főbb upgrade lehetőségek:</strong> GPU (1-3 év), RAM (3-5 év), Storage (1-2 év)</li>
+            <li><strong>Gen-skippes frissítés:</strong> 2-3 év után ajánlott CPU/GPU upgrade</li>
+            <li><strong>Resale érték:</strong> 1-2 év után: 60-70%, 3+ év után: 30-40%</li>
+        </ul>
+    `;
+    upgradeSection.append(upgradeContent);
+    section.append(upgradeSection);
+    
+    // 12. Gaming Comfort & Ergonómia
+    const comfortSection = document.createElement('div');
+    comfortSection.className = 'feature-group';
+    
+    const comfortTitle = document.createElement('h4');
+    comfortTitle.textContent = '🪑 Ergonómia & Gaming Komfort';
+    comfortSection.append(comfortTitle);
+    
+    const comfortContent = document.createElement('div');
+    comfortContent.className = 'feature-content';
+    comfortContent.innerHTML = `
+        <ul>
+            <li><strong>Gaming Szék:</strong> Ergonomikus, Állítható, Gaming kategória, 150-400k Ft</li>
+            <li><strong>Asztal:</strong> Legalább 140cm hosszú, Stabilis, Gaming szezet tartóval, 100-300k Ft</li>
+            <li><strong>Fény:</strong> RGB háttérvilágítás, Anti-flicker monitor, Szobai LED szalag</li>
+            <li><strong>Hőmérséklet:</strong> Optimális: 18-22°C, 40-50% páratartalom</li>
+            <li><strong>Ajánlott napi szünete:</strong> 10 perc/óránként, éjszaka 8 óra alvás</li>
+        </ul>
+    `;
+    comfortSection.append(comfortContent);
+    section.append(comfortSection);
+    
+    // 13. Networking & Connection
+    const networkSection = document.createElement('div');
+    networkSection.className = 'feature-group';
+    
+    const networkTitle = document.createElement('h4');
+    networkTitle.textContent = '🌐 Hálózat & Csatlakozás';
+    networkSection.append(networkTitle);
+    
+    const networkContent = document.createElement('div');
+    networkContent.className = 'feature-content';
+    networkContent.innerHTML = `
+        <ul>
+            <li><strong>Internet sebesség:</strong> Gaming: 100+ Mbps, Streaming: 200+ Mbps, Download: 500+ Mbps</li>
+            <li><strong>Ajánlott kapcsolat:</strong> Ethernet (Vezetékes), WiFi 6E (Wireless Max)</li>
+            <li><strong>Ping ideális:</strong> Online Gaming: <50ms, Competitive: <30ms</li>
+            <li><strong>Router:</strong> WiFi 6/6E, Tri-band, Gaming MU-MIMO</li>
+            <li><strong>VPN/Proxy:</strong> Ajánlott content creatoroknak az IP védelmére</li>
+        </ul>
+    `;
+    networkSection.append(networkContent);
+    section.append(networkSection);
+    
+    // 14. Troubleshooting & Support
+    const supportSection = document.createElement('div');
+    supportSection.className = 'feature-group';
+    
+    const supportTitle = document.createElement('h4');
+    supportTitle.textContent = '🛠️ Hibaelhárítás & Támogatás';
+    supportSection.append(supportTitle);
+    
+    const supportContent = document.createElement('div');
+    supportContent.className = 'feature-content';
+    supportContent.innerHTML = `
+        <ul>
+            <li><strong>Low FPS Debug:</strong> GPU/CPU Monitor → Driver Update → Thermal Check → Settings Lower</li>
+            <li><strong>Crash/Error:</strong> Event Viewer Log Check → Safe Mode Reboot → System File Check (sfc /scannow)</li>
+            <li><strong>Hőzaj:** Cooler Fan Profile → Dust Cleaning → Thermal Paste Reapply</li>
+            <li><strong>Storage Full:</strong> Disk Cleanup → Duplicate File Cleaner → Unused App Removal</li>
+            <li><strong>Szoftver Update:</strong> Windows/Drivers havonta, BIOS évente</li>
+        </ul>
+    `;
+    supportSection.append(supportContent);
+    section.append(supportSection);
+    
     resultElement.append(section);
 }
 
