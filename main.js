@@ -912,12 +912,25 @@ window.addEventListener('forgestudio-language-change', () => {
     }
 });
 
-// Performance: Memoize translate function results
 const translateCache = new Map();
-const originalTranslate = translate;
-function translate(text) {
+
+// Safe wrapper for translate - handles undefined translate gracefully
+function safeTranslate(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    // If the main translate function isn't ready yet, return as-is
+    if (typeof translate !== 'function' || translateCache === undefined) {
+        return text;
+    }
+    
     if (!translateCache.has(text)) {
-        translateCache.set(text, originalTranslate(text));
+        try {
+            const translated = translate(text);
+            translateCache.set(text, translated);
+        } catch (e) {
+            // If translate fails, just return original
+            translateCache.set(text, text);
+        }
     }
     return translateCache.get(text);
 }
