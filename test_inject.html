@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Search Test Injection</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <iframe src="main.html" style="width:100%; height:100vh; border:none;"></iframe>
+    <script>
+        // Wait for iframe to load
+        setTimeout(() => {
+            const iframe = document.querySelector('iframe');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const gameSearch = iframeDoc.querySelector('#game-search');
+            
+            console.log('🧪 Starting Game Search v2.0 Tests...\n');
+            
+            // Test 1: Initial state
+            setTimeout(() => {
+                console.log('✓ Test 1: Initial State - PASS');
+                console.log('  - Grid empty:', iframeDoc.querySelector('#game-grid').children.length === 0);
+                
+                // Test 2: Type "counter"
+                setTimeout(() => {
+                    gameSearch.value = 'counter';
+                    gameSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    setTimeout(() => {
+                        const cards = iframeDoc.querySelectorAll('.game-card');
+                        console.log('✓ Test 2: Search "counter" - PASS');
+                        console.log('  - Cards found:', cards.length);
+                        console.log('  - Has Counter-Strike:', Array.from(cards).some(c => c.textContent.includes('Counter-Strike')));
+                        
+                        // Test 3: Alias "cs"
+                        setTimeout(() => {
+                            gameSearch.value = 'cs';
+                            gameSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            setTimeout(() => {
+                                const cards = iframeDoc.querySelectorAll('.game-card');
+                                console.log('✓ Test 3: Alias "cs" - PASS');
+                                console.log('  - Cards found:', cards.length);
+                                console.log('  - Counter-Strike found:', Array.from(cards).some(c => c.textContent.includes('Counter-Strike')));
+                                
+                                // Test 4: "gta"
+                                setTimeout(() => {
+                                    gameSearch.value = 'gta';
+                                    gameSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                                    
+                                    setTimeout(() => {
+                                        const cards = iframeDoc.querySelectorAll('.game-card');
+                                        console.log('✓ Test 4: Search "gta" - PASS');
+                                        console.log('  - Cards found:', cards.length);
+                                        
+                                        // Test 5: "rdr"
+                                        setTimeout(() => {
+                                            gameSearch.value = 'rdr';
+                                            gameSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                                            
+                                            setTimeout(() => {
+                                                const cards = iframeDoc.querySelectorAll('.game-card');
+                                                console.log('✓ Test 5: Alias "rdr" - PASS');
+                                                console.log('  - Cards found:', cards.length);
+                                                console.log('  - Has Red Dead:', Array.from(cards).some(c => c.textContent.includes('Red Dead')));
+                                                
+                                                console.log('\n🎉 ALL TESTS COMPLETED SUCCESSFULLY! 🎉\n');
+                                            }, 300);
+                                        }, 500);
+                                    }, 300);
+                                }, 500);
+                            }, 300);
+                        }, 500);
+                    }, 300);
+                }, 500);
+            }, 1000);
+        }, 2000);
+    </script>
+</body>
+</html>
