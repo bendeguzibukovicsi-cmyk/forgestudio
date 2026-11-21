@@ -1,3 +1,13 @@
+// Wait for data.js to export its objects to window
+async function waitForData() {
+  while (!window.gameGroups || !window.developmentStacks || !window.consoleGroups) {
+    await new Promise(r => setTimeout(r, 10));
+  }
+}
+
+(async () => {
+  await waitForData();
+
 const form = document.querySelector('#planner-form');
 const resolutionField = document.querySelector('#resolution-field');
 const consoleField = document.querySelector('#console-field');
@@ -1746,3 +1756,4 @@ document.querySelector('#resolution')?.addEventListener('change', updatePreview)
 
 console.log('✅ Live Preview Panel: Aktív');
 console.log('✅ Advanced Features Module: Aktív');
+})();
