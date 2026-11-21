@@ -155,10 +155,22 @@ function renderGameCards(filterText = '') {
     gameIndexMap.clear();
     
     const lowerFilter = filterText.toLowerCase();
+    const platform = form.elements.platform.value;
     let cardIndex = 0;
     
     Object.entries(gameGroups).forEach(([category, names]) => {
         names.forEach((name) => {
+            // Platform filtering
+            const gamePlatform = gamePlatforms[name];
+            const isAvailableForPlatform = 
+                (platform === 'pc' && (gamePlatform === 'pc' || gamePlatform === 'both')) ||
+                (platform === 'console' && (gamePlatform === 'ps' || gamePlatform === 'both')) ||
+                (platform !== 'pc' && platform !== 'console');
+            
+            if (!isAvailableForPlatform) {
+                return;
+            }
+            
             // Smart filtering: search in name and category
             const matchesFilter = !lowerFilter || 
                 name.toLowerCase().includes(lowerFilter) || 
@@ -189,6 +201,7 @@ function renderGameCards(filterText = '') {
                 }
                 saveCheckedGames();
                 filterGames(); // Re-filter to update counts
+                updatePreview(); // Update preview on game selection
             });
             
             const icon = document.createElement('span');
