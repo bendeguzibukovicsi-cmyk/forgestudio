@@ -172,11 +172,20 @@ function renderGameCards(filterText = '') {
             }
             
             // Smart filtering: search in name and category
-            const matchesFilter = !lowerFilter || 
+            // Ha van keresési szöveg: akkor csak az illeszkedők
+            // Ha nincs keresési szöveg: akkor csak az előkészített játékok
+            const isChecked = checkedGames.has(name);
+            const matchesFilter = lowerFilter ? (
                 name.toLowerCase().includes(lowerFilter) || 
-                category.toLowerCase().includes(lowerFilter);
+                category.toLowerCase().includes(lowerFilter)
+            ) : false;
             
-            if (!matchesFilter) {
+            // Ha van keresési szöveg és nem illeszkedik, akkor skip
+            // Ha nincs keresési szöveg és nincs kiválasztva, akkor skip
+            if (lowerFilter && !matchesFilter && !isChecked) {
+                return;
+            }
+            if (!lowerFilter && !isChecked) {
                 return;
             }
             
@@ -187,7 +196,7 @@ function renderGameCards(filterText = '') {
             input.type = 'checkbox';
             input.name = 'game';
             input.value = name;
-            input.checked = checkedGames.has(name); // Restore checked state
+            input.checked = isChecked;
             
             // Track current index for this game
             gameIndexMap.set(name, cardIndex);
