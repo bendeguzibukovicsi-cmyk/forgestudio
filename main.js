@@ -9,6 +9,8 @@ const gameSearch = document.querySelector('#game-search');
 const gameSuggestions = document.querySelector('#game-suggestions');
 const consoleSelect = document.querySelector('#console');
 const monitorSelect = document.querySelector('#monitor-select');
+const previewContent = document.querySelector('#preview-content');
+const previewStatus = document.querySelector('#preview-status');
 
 const monitorPrices = {
     'gaming': { min: 150000, avg: 250000, max: 500000 },
