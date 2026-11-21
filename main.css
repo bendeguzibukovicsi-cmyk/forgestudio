@@ -121,13 +121,7 @@ button, a, input, select, summary { outline-offset: 4px; }
 .step-title p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .platform-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .profile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.game-grid { 
-    display: grid; 
-    grid-template-columns: repeat(4, minmax(0, 1fr)); 
-    gap: 12px; 
-    min-height: 60px; 
-}
-
+.game-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-height: 60px; }
 .game-grid:empty::before {
     content: '🔍 Kezdj el gépelni a játék nevét...';
     grid-column: 1 / -1;
@@ -139,94 +133,21 @@ button, a, input, select, summary { outline-offset: 4px; }
     font-size: 14px;
     text-align: center;
     min-height: 100px;
-    animation: pulse-hint 2s ease-in-out infinite;
 }
-
-@keyframes pulse-hint {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-}
-
 .game-card, .platform-card {
-    position: relative; 
-    min-width: 0; 
-    border: 1px solid var(--border); 
-    border-radius: 16px;
-    background: #ffffff08; 
-    cursor: pointer; 
-    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    position: relative; min-width: 0; border: 1px solid var(--border); border-radius: 16px;
+    background: #ffffff08; cursor: pointer; transition: border-color .2s, background .2s, transform .2s;
 }
-
-.platform-card { 
-    display: flex; 
-    align-items: center; 
-    gap: 13px; 
-    padding: 18px; 
-}
-
-.game-card { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 13px; 
-    min-height: 125px; 
-    padding: 18px;
-}
-
-.platform-card:hover, .game-card:hover { 
-    border-color: #52b7888c; 
-    background: #52b78812; 
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px #52b78820;
-}
-
-.game-card:has(input:checked), .platform-card:has(input:checked) { 
-    border-color: var(--green); 
-    background: #52b7881b; 
-    box-shadow: inset 0 0 0 1px #52b78840;
-}
-
-.game-card:focus-within, .platform-card:focus-within { 
-    outline: 2px solid var(--green); 
-    outline-offset: 3px; 
-}
-
-.game-card input, .platform-card input { 
-    position: absolute; 
-    opacity: 0; 
-}
-
-.platform-icon { 
-    width: 48px; 
-    height: 48px; 
-    border-radius: 16px; 
-}
-
-.platform-icon svg { 
-    width: 24px; 
-    height: 24px; 
-}
-
-.game-icon { 
-    width: 40px; 
-    height: 40px; 
-    border-radius: 13px; 
-    font-size: 18px; 
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.game-card strong, .platform-card strong { 
-    display: block; 
-    font-size: 13px; 
-    line-height: 1.35;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
+.platform-card { display: flex; align-items: center; gap: 13px; padding: 18px; }
+.game-card { display: flex; flex-direction: column; gap: 13px; min-height: 125px; padding: 18px; }
+.platform-card:hover, .game-card:hover { border-color: #52b7888c; background: #52b78812; transform: translateY(-2px); }
+.game-card:has(input:checked), .platform-card:has(input:checked) { border-color: var(--green); background: #52b7881b; box-shadow: inset 0 0 0 1px #52b78840; }
+.game-card:focus-within, .platform-card:focus-within { outline: 2px solid var(--green); outline-offset: 3px; }
+.game-card input, .platform-card input { position: absolute; opacity: 0; }
+.platform-icon { width: 48px; height: 48px; border-radius: 16px; }
+.platform-icon svg { width: 24px; height: 24px; }
+.game-icon { width: 40px; height: 40px; border-radius: 13px; font-size: 18px; line-height: 1; }
+.game-card strong, .platform-card strong { display: block; font-size: 13px; line-height: 1.35; }
 .game-card small, .platform-card small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .check { position: absolute; top: 15px; right: 16px; color: var(--green); opacity: 0; }
 .game-card:has(input:checked) .check { opacity: 1; }
@@ -245,84 +166,13 @@ button, a, input, select, summary { outline-offset: 4px; }
 .search-icon { width: 20px; height: 20px; flex: none; color: var(--orange); }
 .search-input { width: 100%; min-width: 0; height: 56px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 14px; }
 .search-input::placeholder, input::placeholder { color: #a7a29a; }
-.game-suggestions { 
-    position: absolute; 
-    z-index: 5; 
-    top: calc(100% + 7px); 
-    right: 0; 
-    left: 0; 
-    max-height: 320px; 
-    overflow-y: auto; 
-    border: 1px solid #ffffff38; 
-    border-radius: 14px; 
-    background: #302f2c; 
-    box-shadow: 0 20px 45px #0009;
-    scrollbar-width: thin;
-    scrollbar-color: #52b78844 transparent;
-}
-
-.game-suggestions::-webkit-scrollbar {
-    width: 6px;
-}
-
-.game-suggestions::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.game-suggestions::-webkit-scrollbar-thumb {
-    background: #52b78844;
-    border-radius: 3px;
-}
-
-.game-suggestions::-webkit-scrollbar-thumb:hover {
-    background: #52b788cc;
-}
-
-.game-suggestion { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    gap: 12px; 
-    padding: 13px 17px; 
-    border-bottom: 1px solid #ffffff0e; 
-    cursor: pointer;
-    transition: background-color .15s ease;
-}
-
-.game-suggestion:last-child { 
-    border-bottom: 0; 
-}
-
-.game-suggestion:hover { 
-    background: #52b7882e; 
-}
-
-.game-suggestion[aria-selected="true"] { 
-    background: #52b78848;
-    color: var(--green);
-}
-
-.game-suggestion strong { 
-    font-size: 13px; 
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.game-suggestion span { 
-    color: var(--muted); 
-    font-size: 11px; 
-    text-align: right;
-    white-space: nowrap;
-}
-
-.game-suggestion-empty { 
-    padding: 15px 17px; 
-    color: var(--muted); 
-    font-size: 13px;
-    text-align: center;
-}
+.game-suggestions { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; left: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ffffff38; border-radius: 14px; background: #302f2c; box-shadow: 0 20px 45px #0009; }
+.game-suggestion { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 17px; border-bottom: 1px solid #ffffff0e; cursor: pointer; }
+.game-suggestion:last-child { border-bottom: 0; }
+.game-suggestion:hover, .game-suggestion[aria-selected="true"] { background: #52b7882e; }
+.game-suggestion strong { font-size: 13px; font-weight: 600; }
+.game-suggestion span { color: var(--muted); font-size: 11px; text-align: right; }
+.game-suggestion-empty { padding: 15px 17px; color: var(--muted); font-size: 13px; }
 .search-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .game-hint { margin: 12px 0 20px; color: var(--muted); font-size: 12px; line-height: 1.65; }
 #game-count { flex: none; margin-bottom: 8px; color: var(--green); font-size: 11px; font-weight: 700; }
