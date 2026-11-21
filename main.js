@@ -777,7 +777,10 @@ gameGrid.addEventListener('change', (event) => {
     filterGames();
     if (event.target.closest('.game-card').hidden) gameSearch.focus();
 });
-filterGames();
+
+// Initialize empty game grid - only show games when searching
+gameGrid.replaceChildren();
+document.querySelector('#game-count').textContent = '';
 
 form.addEventListener('change', () => {
     const platform = form.elements.platform.value;
@@ -793,7 +796,12 @@ form.addEventListener('change', () => {
     
     // Re-render games when platform changes (to filter by platform availability)
     if (platform === 'pc' || platform === 'console') {
-        renderGameCards(document.querySelector('#game-search input')?.value || '');
+        const currentQuery = gameSearch.value.trim();
+        if (currentQuery) {
+            renderGameCards(currentQuery);
+        } else {
+            gameGrid.replaceChildren();
+        }
     }
 });
 
