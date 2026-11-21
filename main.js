@@ -614,79 +614,134 @@ function closeGameSuggestions() {
     activeSuggestion = -1;
 }
 
-function filterGames() {
-    const query = gameSearch.value.trim().toLocaleLowerCase('hu');
+function fuzzyMatch(str, pattern) {
+    const lowerStr = str.toLowerCase();
+    const lowerPattern = pattern.toLowerCase();
     
-    // Csak akkor render a játékokat, ha van keresési szöveg
+    if (lowerPattern === '') return true;
+    
+    let strIndex = 0;
+    let patternIndex = 0;
+    let score = 0;
+    
+    while (strIndex < lowerStr.length && patternIndex < lowerPattern.length) {
+        if (lowerStr[strIndex] === lowerPattern[patternIndex]) {
+            score += 1;
+            patternIndex++;
+        }
+        strIndex++;
+    }
+    
+    return patternIndex === lowerPattern.length ? score : 0;
+}
+
+function getGameAliases(gameName) {
+    const name = gameName.toLowerCase();
+    const aliases = [];
+    
+    if (rockstarNames.has(gameName)) aliases.push('rockstar');
+    if (name.includes('grand theft auto')) {
+        aliases.push('gta');
+        if (name.includes('vi')) aliases.push('gta 6');
+        if (name.includes('v') && !name.includes('vi')) aliases.push('gta 5');
+        if (name.includes('iv')) aliases.push('gta 4');
+        if (name.includes('iii')) aliases.push('gta 3');
+    }
+    if (name.includes('red dead')) {
+        aliases.push('rdr');
+        if (name.includes('redemption 2')) aliases.push('rdr2');
+    }
+    if (name.includes('call of duty')) aliases.push('cod');
+    if (name.includes('valorant')) aliases.push('val');
+    if (name.includes('counter-strike')) aliases.push('cs');
+    if (name.includes('escape from tarkov')) aliases.push('eft');
+    if (name.includes('dark souls')) aliases.push('ds');
+    if (name.includes('elden ring')) aliases.push('er');
+    if (name.includes('monster hunter')) aliases.push('mh');
+    if (name.includes('league of legends')) aliases.push('lol');
+    if (name.includes('dota')) aliases.push('dota 2');
+    if (name.includes('world of warcraft')) aliases.push('wow');
+    if (name.includes('final fantasy')) aliases.push('ff');
+    
+    return aliases;
+}
+
+function filterGames() {
+    const query = gameSearch.value.trim();
+    
     if (!query) {
         gameGrid.replaceChildren();
         gameSuggestions.replaceChildren();
         activeSuggestion = -1;
         gameSearch.removeAttribute('aria-activedescendant');
         
-        // Frissítsd a számlálókat
         const count = document.querySelector('#game-count');
-        if (count) {
-            count.textContent = '';
-        }
+        if (count) count.textContent = '';
         return;
     }
     
-    // Render cards based on search query - this populates gameIndexMap
     renderGameCards(query);
     
-    // Get newly rendered cards - all of them are now what we need to filter
     const gameCards = [...gameGrid.querySelectorAll('.game-card')];
-    
     let matches = 0;
     let selected = 0;
+    
+    const matchedGames = [];
+    
     gameSuggestions.replaceChildren();
     activeSuggestion = -1;
     gameSearch.removeAttribute('aria-activedescendant');
     
-    // Iterate through rendered cards
-    gameCards.forEach((card, displayIndex) => {
+    gameCards.forEach((card) => {
         const input = card.querySelector('input');
         const checked = input.checked;
-        const name = input.value.toLocaleLowerCase('hu');
+        const gameName = input.value;
+        const name = gameName.toLowerCase();
+        const queryLower = query.toLowerCase();
         
-        // Smart aliases for better search
-        const gtaAlias = name.replace(/^grand theft auto/, 'gta')
-            .replace(/^gta vi\b/, 'gta 6')
-            .replace(/^gta v\b/, 'gta 5')
-            .replace(/^gta iv\b/, 'gta 4')
-            .replace(/^gta iii\b/, 'gta 3');
+        const aliases = getGameAliases(gameName);
         
-        const aliases = [
-            rockstarNames.has(input.value) ? 'rockstar games' : '',
-            name.startsWith('grand theft auto') ? gtaAlias : '',
-            name.startsWith('red dead') ? name.replace('red dead redemption', 'rdr') : '',
-            name === 'red dead redemption 2' ? 'rdr2' : ''
-        ];
+        const exactMatch = name.includes(queryLower);
+        const startsWith = name.startsWith(queryLower);
+        const aliasMatch = aliases.some(a => a.includes(queryLower));
+        const fuzzyScore = fuzzyMatch(name, queryLower);
         
-        const matchesQuery = Boolean(query) && (name.includes(query) || aliases.some((alias) => alias.includes(query)));
+        const matchesQuery = exactMatch || aliasMatch || fuzzyScore > 0;
         
         if (checked) selected++;
         
         if (matchesQuery) {
             matches++;
-            if (!checked) {
-                const option = document.createElement('div');
-                option.id = `game-option-${displayIndex}`;
-                option.className = 'game-suggestion';
-                option.setAttribute('role', 'option');
-                option.setAttribute('aria-selected', 'false');
-                option.dataset.gameName = name; // Use game name instead of index
-                const title = document.createElement('strong');
-                title.textContent = input.value;
-                const category = document.createElement('span');
-                category.textContent = card.querySelector('small').textContent;
-                option.append(title, category);
-                gameSuggestions.append(option);
-            }
+            matchedGames.push({
+                card,
+                input,
+                name: gameName,
+                checked,
+                score: (startsWith ? 1000 : 0) + (exactMatch ? 500 : 0) + (aliasMatch ? 250 : 0) + fuzzyScore
+            });
         }
-        // Show only checked or when query is active and matches
+        
         card.hidden = !(checked || (query && matchesQuery));
+    });
+    
+    matchedGames.sort((a, b) => b.score - a.score);
+    
+    matchedGames.forEach((item, idx) => {
+        if (!item.checked) {
+            const option = document.createElement('div');
+            option.id = `game-option-${idx}`;
+            option.className = 'game-suggestion';
+            option.setAttribute('role', 'option');
+            option.setAttribute('aria-selected', 'false');
+            option.dataset.gameName = item.name;
+            
+            const title = document.createElement('strong');
+            title.textContent = item.name;
+            const category = document.createElement('span');
+            category.textContent = item.card.querySelector('small').textContent;
+            option.append(title, category);
+            gameSuggestions.append(option);
+        }
     });
     
     if (query && !gameSuggestions.children.length) {
