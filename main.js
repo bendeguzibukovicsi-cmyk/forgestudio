@@ -648,7 +648,9 @@ function filterGames() {
     
     gameSuggestions.hidden = !query;
     gameSearch.setAttribute('aria-expanded', String(Boolean(query)));
-    localizeTree(gameSuggestions);
+    if (typeof localizeTree === 'function') {
+        localizeTree(gameSuggestions);
+    }
     
     document.querySelector('#game-count').textContent = query
         ? bilingual(`${matches} találat · ${selected} kiválasztva`, `${matches} results · ${selected} selected`)
