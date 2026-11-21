@@ -120,32 +120,80 @@ const storageOptions = {
 
 // Store all games for search, don't render initially
 const allGamesMap = new Map();
+const gameIndexMap = new Map(); // Map game name to its current index in grid
+const checkedGames = new Set();
+
 Object.entries(gameGroups).forEach(([category, names]) => {
     names.forEach((name) => {
         allGamesMap.set(name, category);
     });
 });
 
-// Function to render game cards based on search/filter
+// Store checked state from localStorage
+function saveCheckedGames() {
+    localStorage.setItem('forgestudio-games', JSON.stringify([...checkedGames]));
+}
+
+function loadCheckedGames() {
+    try {
+        const saved = localStorage.getItem('forgestudio-games');
+        if (saved) {
+            JSON.parse(saved).forEach(game => checkedGames.add(game));
+        }
+    } catch (e) {
+        console.error('Failed to load saved games:', e);
+    }
+}
+
+loadCheckedGames();
+
+// Function to render game cards based on search/filter - Turbocharged version
 function renderGameCards(filterText = '') {
     gameGrid.replaceChildren();
+    gameIndexMap.clear();
+    
     const lowerFilter = filterText.toLowerCase();
+    let cardIndex = 0;
     
     Object.entries(gameGroups).forEach(([category, names]) => {
         names.forEach((name) => {
-            if (lowerFilter && !name.toLowerCase().includes(lowerFilter)) {
+            // Smart filtering: search in name and category
+            const matchesFilter = !lowerFilter || 
+                name.toLowerCase().includes(lowerFilter) || 
+                category.toLowerCase().includes(lowerFilter);
+            
+            if (!matchesFilter) {
                 return;
             }
+            
             const label = document.createElement('label');
             label.className = 'game-card';
+            
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.name = 'game';
             input.value = name;
+            input.checked = checkedGames.has(name); // Restore checked state
+            
+            // Track current index for this game
+            gameIndexMap.set(name, cardIndex);
+            cardIndex++;
+            
+            input.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    checkedGames.add(name);
+                } else {
+                    checkedGames.delete(name);
+                }
+                saveCheckedGames();
+                filterGames(); // Re-filter to update counts
+            });
+            
             const icon = document.createElement('span');
             icon.className = 'game-icon';
             icon.textContent = '✦';
             icon.setAttribute('aria-hidden', 'true');
+            
             const text = document.createElement('span');
             const title = document.createElement('strong');
             title.textContent = name;
@@ -155,6 +203,7 @@ function renderGameCards(filterText = '') {
             check.className = 'check';
             check.textContent = '✓';
             check.setAttribute('aria-hidden', 'true');
+            
             text.append(title, subtitle);
             label.append(input, icon, text, check);
             gameGrid.append(label);
