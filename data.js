@@ -486,3 +486,15 @@ const gameProfiles = {
     'Valorant': { tier: 'entry', vram: '4GB+', pci: '3.0', monitor: '1080p 240Hz' },
     'Counter-Strike 2': { tier: 'entry', vram: '4GB+', pci: '3.0', monitor: '1080p 360Hz' }
 };
+
+// Export to window for main.js to use
+window.gamePlatforms = gamePlatforms;
+window.gameGroups = gameGroups;
+window.additionalGames = additionalGames;
+window.knownGames = knownGames;
+window.developmentStacks = developmentStacks;
+window.consoleGroups = consoleGroups;
+window.hardwareGroups = hardwareGroups;
+window.advancedBuilds = advancedBuilds;
+window.monitorPairingRules = monitorPairingRules;
+window.gameProfiles = gameProfiles;
