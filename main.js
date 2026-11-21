@@ -775,6 +775,11 @@ form.addEventListener('change', () => {
     document.querySelector('#case-field').hidden = platform === 'console';
     result.hidden = true;
     message.textContent = '';
+    
+    // Re-render games when platform changes (to filter by platform availability)
+    if (platform === 'pc' || platform === 'console') {
+        renderGameCards(document.querySelector('#game-search input')?.value || '');
+    }
 });
 
 form.addEventListener('submit', (event) => {
