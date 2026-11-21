@@ -1079,3 +1079,120 @@ document.addEventListener('keydown', (e) => {
 });
 
 console.log('✅ Smart Suggestion Engine aktív - Ctrl+Enter = Submit, Ctrl+R = Reset');
+
+// Live Preview Panel
+function updatePreview() {
+    const platform = form.elements.platform.value;
+    const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
+    const budget = Number(document.querySelector('#budget').value) || 0;
+    const monitor = monitorSelect ? monitorSelect.value : 'none';
+    const resolution = document.querySelector('#resolution') ? document.querySelector('#resolution').value : '1080';
+    
+    if (platform === 'work') {
+        // Work preview
+        const selectedStacks = [...form.querySelectorAll('input[name="stack"]:checked')].map(i => i.value);
+        const profiles = [...new Set([
+            ...[...form.querySelectorAll('input[name="profile"]:checked')].map((input) => input.value),
+            ...selectedStacks.map((input) => input.dataset.profile)
+        ])];
+        
+        if (profiles.length === 0) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `${profiles.length} fejlesztési terület kiválasztva`;
+        const specs = [`Terület: ${profiles.join(', ')}`];
+        if (budget > 0) specs.push(`Költségvetés: ${budget.toLocaleString('hu-HU')} Ft`);
+        if (monitor !== 'none') specs.push(`Monitor: ${getMonitorName(monitor)}`);
+        
+        renderPreviewSpecs(specs);
+    } else if (platform === 'console') {
+        // Console preview
+        const console = consoleSelect.selectedOptions[0];
+        if (!console) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `Konzol kiválasztva`;
+        const specs = [
+            `Modell: ${console.value}`,
+            `Ár: ~${consoleBudgetGuides[console.value]?.toLocaleString('hu-HU') || 'N/A'} Ft`
+        ];
+        if (monitor !== 'none') specs.push(`Monitor: ${getMonitorName(monitor)}`);
+        
+        renderPreviewSpecs(specs);
+    } else {
+        // PC gaming preview
+        if (selectedGames.length === 0) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `${selectedGames.length} játék kiválasztva - ${resolution}p`;
+        
+        const resolutionLevel = { '1080': 0, '1440': 1, '4k': 2 }[resolution];
+        const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
+        const build = builds[level];
+        
+        const specs = [
+            `Build: ${build.name}`,
+            `Alap ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
+            `Játékok: ${selectedGames.join(', ')}`,
+            `Felbontás: ${resolution}p`
+        ];
+        
+        if (monitor !== 'none') {
+            const monitorPrice = monitorPrices[monitor]?.avg || 0;
+            specs.push(`Monitor: ${getMonitorName(monitor)} (~${monitorPrice.toLocaleString('hu-HU')} Ft)`);
+        }
+        
+        renderPreviewSpecs(specs, build.price);
+    }
+}
+
+function renderPreviewPlaceholder() {
+    previewStatus.textContent = 'Válassz a fent és lásd az előnézetet itt';
+    previewContent.innerHTML = `
+        <div class="preview-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <p>A preview itt jelenik meg</p>
+        </div>
+    `;
+}
+
+function renderPreviewSpecs(specs, basePrice = 0) {
+    previewContent.innerHTML = specs
+        .map(spec => `
+            <div class="preview-spec-item">
+                <span class="preview-spec-value">${spec}</span>
+            </div>
+        `).join('') + (basePrice > 0 ? `
+            <div class="preview-price">
+                <span class="preview-price-label">Becsült alap ár</span>
+                <div class="preview-price-value">${basePrice.toLocaleString('hu-HU')} Ft</div>
+            </div>
+        ` : '');
+}
+
+function getMonitorName(value) {
+    const names = {
+        'gaming': 'Gaming Monitor (144-240Hz)',
+        'work': 'Munka Monitor (60Hz, színhelyes)',
+        'both': 'Gaming + Munka Monitor',
+        'ultrawide': 'Ultrawide Monitor (34")',
+        '4k': '4K Professional Monitor'
+    };
+    return names[value] || value;
+}
+
+// Update preview on form changes
+form.addEventListener('change', updatePreview);
+document.querySelector('#budget')?.addEventListener('input', updatePreview);
+monitorSelect?.addEventListener('change', updatePreview);
+document.querySelector('#resolution')?.addEventListener('change', updatePreview);
+
+console.log('✅ Live Preview Panel: Aktív');
