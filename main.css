@@ -121,7 +121,19 @@ button, a, input, select, summary { outline-offset: 4px; }
 .step-title p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .platform-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .profile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.game-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.game-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-height: 60px; }
+.game-grid:empty::before {
+    content: '🔍 Kezdj el gépelni a játék nevét...';
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #a7a29a;
+    font-size: 14px;
+    text-align: center;
+    min-height: 100px;
+}
 .game-card, .platform-card {
     position: relative; min-width: 0; border: 1px solid var(--border); border-radius: 16px;
     background: #ffffff08; cursor: pointer; transition: border-color .2s, background .2s, transform .2s;
