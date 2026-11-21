@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Találd meg a játékokhoz vagy fejlesztéshez illő gépet.">
+    <title>ForgeStudio – Gépajánló</title>
+    <link rel="stylesheet" href="main.css">
+    <script type="importmap">
+        {"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+    </script>
+    <script src="data.js" defer></script>
+    <script src="i18n.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="scene.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo" href="#top"><span class="logo-mark">F</span> FORGE<span>STUDIO</span></a>
+        <nav class="hero-nav" aria-label="Fő navigáció"><a href="#top">Kezdőlap</a><a href="#tervezo">Tervező</a></nav>
+        <label class="language-switch"><span class="sr-only">Nyelv / Language</span><select id="language-select" aria-label="Nyelv / Language"><option value="hu">HU · Magyar</option><option value="en">EN · English</option></select></label>
+        <a class="header-link" href="#tervezo">Kezdjük el <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="top">
+        <section class="cinematic" id="felfedezes" aria-label="Fedezd fel a ForgeStudio világát">
+            <div class="cinematic-stage">
+                <canvas id="gpu-canvas" aria-label="RTX 5090 3D modell: húzással vagy görgetéssel forgatható"></canvas>
+                <div class="scene-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="scene-glow" aria-hidden="true"></div>
+                <div class="scene-badge" aria-hidden="true"><span>RTX 5090</span><span>3D</span></div>
+                <div class="scene-copy">
+                    <p class="scene-kicker">FORGESTUDIO</p>
+                    <div class="scene-slide is-active"><h1>Gépajánló<br><em>játékhoz és munkához.</em></h1><p>Válassz játékokat vagy fejlesztési területeket.</p></div>
+                    <div class="scene-slide"><h2>Játékos<br><em>PC.</em></h2><p>Ajánlott összeállítás a választott felbontáshoz.</p></div>
+                    <div class="scene-slide"><h2>Konzol<br><em>és kézi PC.</em></h2><p>Válassz modellt és szükség esetén tárhelybővítést.</p></div>
+                    <div class="scene-slide"><h2>Fejlesztői<br><em>munkaállomás.</em></h2><p>Gépajánló a választott fejlesztési területekhez.</p></div>
+                    <a class="scene-cta" href="#tervezo">GÉPAJÁNLÓ <span aria-hidden="true">↗</span></a>
+                    <p class="scene-rotate-hint">Húzd a kártyát a forgatáshoz ↔</p>
+                </div>
+                <div class="scene-bottom"><span>GÖRGESS A FELFEDEZÉSHEZ <span aria-hidden="true">↓</span></span><div class="scene-progress" aria-label="A bemutató előrehaladása"><i id="scene-progress"></i></div></div>
+                <p class="scene-status" id="scene-status" role="status">A 3D-s bemutató betöltése…</p>
+                <label id="local-model-picker" class="local-model-picker" hidden>Modell kiválasztása<input id="local-model" type="file" accept=".glb,model/gltf-binary"></label>
+            </div>
+        </section>
+
+        <section class="planner" id="tervezo">
+            <div class="section-heading">
+                <div><h2>Gépajánló</h2></div>
+                <p>Válassz játékos gépet, konzolt vagy fejlesztői munkaállomást.</p>
+            </div>
+            <form id="planner-form">
+                <div class="step">
+                    <div class="step-title"><div><h3>Mire használnád?</h3><p>Válaszd ki a számodra megfelelő módot.</p></div></div>
+                    <div class="platform-grid">
+                        <label class="platform-card"><input type="radio" name="platform" value="pc" checked><span class="platform-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span><span><strong>Gaming PC</strong><small>Játékos összeállítás</small></span><span class="radio-dot"></span></label>
+                        <label class="platform-card"><input type="radio" name="platform" value="console"><span class="platform-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10c2 0 3 2 3.5 4l.8 4c.3 2-1.6 3.2-3.1 2l-2.5-2H8.3l-2.5 2c-1.5 1.2-3.4 0-3.1-2l.8-4C4 10 5 8 7 8Z"/><path d="M7.5 11v4M5.5 13h4M16 12h.01M18 14h.01"/></svg></span><span><strong>Konzol / kézi PC</strong><small>Válassz modellt lent</small></span><span class="radio-dot"></span></label>
+                        <label class="platform-card"><input type="radio" name="platform" value="work"><span class="platform-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span><span><strong>Programozás / munka</strong><small>Fejlesztői munkaállomás</small></span><span class="radio-dot"></span></label>
+                    </div>
+                </div>
+
+                <div class="step" id="game-step">
+                    <div class="step-title"><div><h3>Mivel szeretnél játszani?</h3><p>Válassz ki legalább egy játékot.</p></div></div>
+                    <label class="search-label" for="game-search">Játék keresése</label>
+                    <div class="game-search">
+                        <div class="search-box">
+                            <svg class="search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+                            <input class="search-input" id="game-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="game-suggestions" autocomplete="off" placeholder="Keress egy játékot…">
+                        </div>
+                        <div id="game-suggestions" class="game-suggestions" role="listbox" aria-label="Játéktalálatok" hidden></div>
+                    </div>
+                    <div class="search-meta"><p class="game-hint">Írd be a játék nevét. A kiválasztott játékok keresés közben is láthatók maradnak.</p><span id="game-count" aria-live="polite"></span></div>
+                    <div class="game-grid" id="game-grid"></div>
+                </div>
+
+                <div class="step" id="work-step" hidden>
+                    <div class="step-title"><div><h3>Mivel fejlesztesz?</h3><p>Több területet is kiválaszthatsz.</p></div></div>
+                    <div class="profile-grid">
+                        <label class="game-card"><input type="checkbox" name="profile" value="web"><span class="game-icon" aria-hidden="true">&lt;/&gt;</span><span><strong>Web / Cloud / DevOps</strong><small>Node.js, Docker, Kubernetes</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="devops"><span class="game-icon" aria-hidden="true">☁</span><span><strong>Backend / DevOps</strong><small>Konténerek, adatbázisok, felhő</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="android"><span class="game-icon" aria-hidden="true">▣</span><span><strong>Android / mobilfejlesztés</strong><small>Android Studio, Flutter, emulátorok</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="ios"><span class="game-icon" aria-hidden="true">⌘</span><span><strong>iOS / Apple fejlesztés</strong><small>Xcode, Swift, iOS emulátor</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="game"><span class="game-icon" aria-hidden="true">◇</span><span><strong>Játékfejlesztés / 3D</strong><small>Unreal, Unity, Blender</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="ai"><span class="game-icon" aria-hidden="true">✳</span><span><strong>AI / Machine Learning</strong><small>PyTorch, CUDA, helyi modellek</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="security"><span class="game-icon" aria-hidden="true">⌾</span><span><strong>Kiberbiztonság / adatbázis</strong><small>Virtuális gépek, hálózatok, DB</small></span><span class="check" aria-hidden="true">✓</span></label>
+                        <label class="game-card"><input type="checkbox" name="profile" value="data"><span class="game-icon" aria-hidden="true">▥</span><span><strong>Data Engineering / analitika</strong><small>Spark, Python, adatfeldolgozás</small></span><span class="check" aria-hidden="true">✓</span></label>
+                    </div>
+                    <details class="stack-picker"><summary>Konkrét technológiák kiválasztása</summary><p class="game-hint">A választott eszközök alapján a szükséges fejlesztési területeket is figyelembe vesszük.</p><div id="stack-grid" class="stack-grid"></div></details>
+                </div>
+
+                <div class="step last-step">
+                    <div class="step-title"><div><h3>A részletek</h3><p>Segíts, hogy személyre szabhassuk az ajánlatot.</p></div></div>
+                    <div class="details-grid">
+                        <label id="budget-field">KERETÖSSZEG <span class="optional">(OPCIONÁLIS)</span><div class="input-wrap"><input id="budget" type="number" min="1" step="1" placeholder="pl. 400 000"><span>Ft</span></div></label>
+                        <label id="resolution-field">FELBONTÁS<select id="resolution"><option value="1080">Full HD · 1080p</option><option value="1440">QHD · 1440p</option><option value="4k">4K · 2160p</option></select></label>
+                        <label id="console-field" hidden>KONZOL / KÉZI PC<select id="console"></select></label>
+                        <label id="storage-field" hidden>KONZOL KIEGÉSZÍTŐ<select id="storage"><option value="none">Nem kérek kiegészítőt</option><option value="ssd">Tárhelybővítés (SSD)</option></select></label>
+                        <label id="case-field">GÉPHÁZ STÍLUSA<select id="case-style"><option value="airflow">Magas légáramlás</option><option value="glass">Panoráma üvegház</option><option value="wood">Letisztult, fa betétes</option><option value="silent">Csendes</option><option value="compact">Kompakt Mini-ITX</option></select></label>
+                        <label id="monitor-field">MONITOR (OPCIONÁLIS)<select id="monitor-select"><option value="none">Monitor nélkül</option><option value="gaming">Gaming Monitor</option><option value="work">Munka Monitor</option><option value="both">Gaming + Munka</option><option value="ultrawide">Ultrawide</option><option value="4k">4K Professional</option></select></label>
+                    </div>
+                    <p class="game-hint">A keret ellenőrzése rögzített, hozzávetőleges összegeken alapul, nem élő bolti árakon. A perifériák és a bővítések külön költséget jelentenek.</p>
+                </div>
+                <div class="form-footer"><p id="form-message" role="alert"></p><button class="primary-button" type="submit">Mutasd az ajánlást <span aria-hidden="true">↗</span></button></div>
+            </form>
+
+            <section id="result" class="result" aria-live="polite" hidden></section>
+        </section>
+    </main>
+    <footer><a class="logo" href="#top"><span class="logo-mark">F</span> FORGE<span>STUDIO</span></a></footer>
+</body>
+</html>
