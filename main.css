@@ -121,7 +121,13 @@ button, a, input, select, summary { outline-offset: 4px; }
 .step-title p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .platform-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .profile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.game-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; min-height: 60px; }
+.game-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, minmax(0, 1fr)); 
+    gap: 12px; 
+    min-height: 60px; 
+}
+
 .game-grid:empty::before {
     content: '🔍 Kezdj el gépelni a játék nevét...';
     grid-column: 1 / -1;
@@ -133,21 +139,94 @@ button, a, input, select, summary { outline-offset: 4px; }
     font-size: 14px;
     text-align: center;
     min-height: 100px;
+    animation: pulse-hint 2s ease-in-out infinite;
 }
+
+@keyframes pulse-hint {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
 .game-card, .platform-card {
-    position: relative; min-width: 0; border: 1px solid var(--border); border-radius: 16px;
-    background: #ffffff08; cursor: pointer; transition: border-color .2s, background .2s, transform .2s;
+    position: relative; 
+    min-width: 0; 
+    border: 1px solid var(--border); 
+    border-radius: 16px;
+    background: #ffffff08; 
+    cursor: pointer; 
+    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
 }
-.platform-card { display: flex; align-items: center; gap: 13px; padding: 18px; }
-.game-card { display: flex; flex-direction: column; gap: 13px; min-height: 125px; padding: 18px; }
-.platform-card:hover, .game-card:hover { border-color: #52b7888c; background: #52b78812; transform: translateY(-2px); }
-.game-card:has(input:checked), .platform-card:has(input:checked) { border-color: var(--green); background: #52b7881b; box-shadow: inset 0 0 0 1px #52b78840; }
-.game-card:focus-within, .platform-card:focus-within { outline: 2px solid var(--green); outline-offset: 3px; }
-.game-card input, .platform-card input { position: absolute; opacity: 0; }
-.platform-icon { width: 48px; height: 48px; border-radius: 16px; }
-.platform-icon svg { width: 24px; height: 24px; }
-.game-icon { width: 40px; height: 40px; border-radius: 13px; font-size: 18px; line-height: 1; }
-.game-card strong, .platform-card strong { display: block; font-size: 13px; line-height: 1.35; }
+
+.platform-card { 
+    display: flex; 
+    align-items: center; 
+    gap: 13px; 
+    padding: 18px; 
+}
+
+.game-card { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 13px; 
+    min-height: 125px; 
+    padding: 18px;
+}
+
+.platform-card:hover, .game-card:hover { 
+    border-color: #52b7888c; 
+    background: #52b78812; 
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px #52b78820;
+}
+
+.game-card:has(input:checked), .platform-card:has(input:checked) { 
+    border-color: var(--green); 
+    background: #52b7881b; 
+    box-shadow: inset 0 0 0 1px #52b78840;
+}
+
+.game-card:focus-within, .platform-card:focus-within { 
+    outline: 2px solid var(--green); 
+    outline-offset: 3px; 
+}
+
+.game-card input, .platform-card input { 
+    position: absolute; 
+    opacity: 0; 
+}
+
+.platform-icon { 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 16px; 
+}
+
+.platform-icon svg { 
+    width: 24px; 
+    height: 24px; 
+}
+
+.game-icon { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 13px; 
+    font-size: 18px; 
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-card strong, .platform-card strong { 
+    display: block; 
+    font-size: 13px; 
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
 .game-card small, .platform-card small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .check { position: absolute; top: 15px; right: 16px; color: var(--green); opacity: 0; }
 .game-card:has(input:checked) .check { opacity: 1; }
