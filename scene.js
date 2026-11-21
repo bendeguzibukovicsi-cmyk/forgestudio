@@ -5,7 +5,11 @@ const sceneStatus = document.querySelector('#scene-status');
 let sceneStatusMessage = 'A 3D-s bemutató betöltése…';
 function setSceneStatus(message) {
     sceneStatusMessage = message;
-    sceneStatus.textContent = translate(message);
+    // Use safeTranslate if available, fallback to translate or identity
+    const translatedText = typeof safeTranslate === 'function' 
+        ? safeTranslate(message) 
+        : (typeof translate === 'function' ? translate(message) : message);
+    sceneStatus.textContent = translatedText;
 }
 window.addEventListener('forgestudio-language-change', () => setSceneStatus(sceneStatusMessage));
 const sceneSlides = [...document.querySelectorAll('.scene-slide')];
