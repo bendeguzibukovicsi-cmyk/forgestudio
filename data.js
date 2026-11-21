@@ -498,3 +498,5 @@ window.hardwareGroups = hardwareGroups;
 window.advancedBuilds = advancedBuilds;
 window.monitorPairingRules = monitorPairingRules;
 window.gameProfiles = gameProfiles;
+
+console.log('✅ data.js LOADED! gameGroups keys:', Object.keys(window.gameGroups || {}).length);
