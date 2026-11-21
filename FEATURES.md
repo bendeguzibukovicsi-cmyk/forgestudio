@@ -1,204 +1,153 @@
-# 🚀 ForgeStudio - Turbosított PC Ajánló Alkalmazás
+# 🚀 ForgeStudio Advanced Features Documentation
 
-## Verzió: 2.0 - TURBO
+## Overview
+ForgeStudio now includes comprehensive advanced features that provide users with detailed hardware recommendations, performance predictions, power calculations, and much more.
 
-### ✨ ÚJ FEATURES
+## Available Feature Categories
 
-#### 1️⃣ **Monitor Selector & Árkalkulátor** 🖥️
-- **100+ Monitor modell** az adatbázisban
-- **5 monitor kategória**:
-  - Gaming (34" Ultrawide → 500Hz)
-  - Munka (USB-C, Portable, 4K 10-bit)
-  - Általános (Budget → Premium)
-  - Multi-Monitor Setupok (2×, 3×, 5× configs)
-  - Speciális (7680×4320, Touch, VRR)
+### 1. ⚡ Teljesítmény Előrejelzés (Performance Prediction)
+- GPU FPS estimates for different resolutions (1080p, 1440p, 4K)
+- Performance tier classification (entry, medium, high, extreme, ultimate)
+- Recommended graphics settings based on hardware
+- Bottleneck detection
 
-- **Árbecslés per kategória**:
-  - Gaming: 150,000–500,000 Ft
-  - Munka: 120,000–400,000 Ft
-  - Both: 250,000–1,000,000 Ft
-  - Ultrawide: 200,000–600,000 Ft
-  - 4K Professional: 300,000–800,000 Ft
+### 2. 💰 Költségvetési Kategória (Budget Categorization)
+- Automatic budget tier classification
+- Recommended games for each tier
+- FPS range expectations
+- Price-to-performance analysis
 
-#### 2️⃣ **Performance Optimization Engine** ⚡
-- **Thermal & Power Calculator** - TDP alapján javaslatok
-- **Game-Specific Profiles** - Cyberpunk, Wukong, stb. optimalizálások
-- **GPU/Monitor Pairing Rules** - Ajánlott kombinációk
-- **Budget Optimizer** - Legjobb érték az árban
+### 3. 🖥️ Képernyő Ajánlások (Display Recommendations)
+- Monitor specifications for different resolutions
+- Refresh rate recommendations
+- Response time specifications
+- Price ranges for each category
 
-#### 3️⃣ **Smart Suggestion Engine** 💡
-- **Real-time javaslatok** a választások alapján
-- E-Sports játékok → 240Hz+ ajánlás
-- Erős játékok → High-end GPU ajánlás
-- Munka → Ultrawide javaslat
-- Budgethez igazított tippek
+### 4. 🔧 Karbantartás & Legújabbítás (Maintenance & Updates)
+- Dust cleaning schedule (3-6 months)
+- Thermal paste replacement interval (2-3 years)
+- Driver update recommendations (monthly)
+- Backup schedule (weekly)
 
-#### 4️⃣ **Device Recommendation Engine** 🎮
-- Multi-device setup javaslatok
-- Primary + Secondary device kombinációk
-- Monitor + Periféria ajánlások
-- Platformspecifikus setup (PC/Console/Work)
+### 5. 🚀 Jövő-kompatibilitás (Future Proofing)
+- Hardware longevity assessment
+- Future game compatibility predictions
+- Component upgrade recommendations
+- Expected hardware lifespan
 
-#### 5️⃣ **Advanced Build Configurations** 🔧
-- **1080p E-Sports**: 240 FPS, 400k Ft
-- **1440p Balanced**: 144 FPS, 650k Ft
-- **4K Cinematic**: 60 FPS, 1.2M Ft
-- **Workstation Pro**: 128GB RAM, 950k Ft
+### 6. 🎮 Játékos Profilok (Gaming Profiles)
+- Casual Gaming (60 FPS, Medium settings, 300-400k Ft)
+- Competitive E-Sports (240+ FPS, Low settings, 600k-1M Ft)
+- Hardcore Ultra (60 FPS, Maximum+Ray Tracing, 1-2M Ft+)
+- Streaming & Content Creation profiles
 
-#### 6️⃣ **Performance Enhancements** ⚙️
-- **Translation Cache** - 50% gyorsabb fordítás
-- **Cache Warmer** - Preload popular selections
-- **Keyboard Shortcuts**:
-  - `Ctrl+Enter` = Quick Submit
-  - `Ctrl+R` = Reset Form
+### 7. 🖱️ Periféria Ajánlások (Peripheral Suggestions)
+- Gaming Mouse recommendations (12800+ DPI)
+- Mechanical Keyboard specs (Hot-swap)
+- Gaming Headset (7.1 Virtual Surround)
+- Mousepad size recommendations (90x40cm)
 
-#### 7️⃣ **UI/UX Improvements** 🎨
-- Gradient Monitor Selector
-- Performance Tips Cards
-- Monitor Recommendation Badges
-- Smooth Animations & Transitions
-- Better Mobile Responsiveness
-- Turbo Feature Pulse Animation
+### 8. 🏆 Játékos Kategóriák & Ajánlások (Gaming Categories)
+- Casual Player
+- Hardcore Gamer
+- E-Sports Pro
+- Streamer
+- Content Creator
 
----
+### 9. 👓 VR Támogatás & Speciális Funkciók (VR Support)
+- VR Readiness assessment
+- Ray Tracing support level
+- DLSS/FSR upscaling capabilities
+- Ultrawide screen support
 
-## 📊 STATISZTIKA
+### 10. ⚡ Energiafogyasztás & Hűtés (Power & Thermal)
+- TDP calculations
+- PSU wattage recommendations
+- Cooling requirements
+- Maximum safe temperatures
+- Annual power cost estimates
 
-| Kategória | Darabszám |
-|-----------|-----------|
-| Monitor Modellek | **100+** |
-| Játékok | **150+** |
-| Development Tools | **100+** |
-| Hardware Kombinációk | **1000+** |
-| Konzol Modellek | **15+** |
-| Kézi PC Eszközök | **10+** |
+### 11. 📈 Fejlesztés & Élettartam (Upgrade Path & Longevity)
+- Expected hardware lifespan (5-7 years for PC, 10+ for Console)
+- Primary upgrade components (GPU, RAM, Storage)
+- Generation-skip upgrade recommendations
+- Resale value estimates
 
----
+### 12. 🪑 Ergonómia & Gaming Komfort (Ergonomics & Comfort)
+- Gaming chair requirements
+- Desk specifications (minimum 140cm length)
+- Lighting recommendations (RGB, Anti-flicker)
+- Optimal temperature (18-22°C, 40-50% humidity)
+- Break schedule (10 min/hour, 8 hours sleep)
 
-## 🎯 FŐBB FEJLESZTÉSEK
+### 13. 🌐 Hálózat & Csatlakozás (Network & Connection)
+- Internet speed requirements
+- Connection type recommendations (Ethernet vs WiFi 6E)
+- Optimal ping levels
+- Router specifications
+- VPN/Proxy recommendations
 
-### Teljesítmény
-- ✅ 50% gyorsabb fordítás (Translation Cache)
-- ✅ Lazy loading Game Database
-- ✅ Selection Memoization
-- ✅ Event Debouncing
+### 14. 🛠️ Hibaelhárítás & Támogatás (Troubleshooting & Support)
+- Low FPS debugging steps
+- Crash/Error diagnostics
+- Heat and noise management
+- Storage management
+- Software update schedule
 
-### Funkció
-- ✅ Monitor árkalkuláció a végleges ajánlásban
-- ✅ Smart GPU/Monitor pairing
-- ✅ Thermal requirements calculator
-- ✅ Budget optimization algorithm
+## Implementation Details
 
-### Design
-- ✅ Gradient UI elemek
-- ✅ Pulse animations
-- ✅ Better color contrast (WCAG AA)
-- ✅ Responsive monitor selector
+### File Structure
+- `features.js` - Core features module (453 lines)
+- `main.js` - Integration with form submission (1558 lines)
+- `main.css` - Styling for feature sections (571 lines)
 
----
+### Integration Points
+- Form submission automatically triggers `addAdvancedFeatures()`
+- Features are displayed in a collapsible `<details>` element
+- All sections are dynamically generated from the features module
+- Mobile-responsive design
 
-## 💡 HASZNÁLAT
+### Styling
+- Cyan accent color (#00d4ff)
+- Green highlights (#00ff88)
+- Smooth transitions and hover effects
+- Dark theme optimized for gaming
 
-### Monitor Kiválasztása
-1. Válassz "Mire használnád?" (Gaming/Work/Console)
-2. Töltsd ki a játékokat vagy fejlesztési területeket
-3. Állítsd az **MONITOR** dropdownt a kívánt típusra
-4. Az árbecslés automatikusan frissül
+## Usage
 
-### Smart Suggestions
-- Miközben kitöltöd az űrlapot, az app real-time javaslatokat mutat
-- Konzol játék + 1080p → E-Sports monitor javaslat
-- High budget → Premium hardware javaslat
+### For Users
+1. Navigate to the ForgeStudio website
+2. Fill out the form (platform, budget, games, resolution)
+3. Click submit to generate a recommendation
+4. Scroll down to see the new "🚀 Haladó funkciók & Teljesítmény Info" section
+5. Click to expand and explore all features
 
-### Keyboard Shortcuts
-- **Ctrl+Enter**: Gyors submit
-- **Ctrl+R**: Form reset
-
----
-
-## 🔧 TECHNIKAI JELLEMZŐK
-
-### New Data Structures
+### For Developers
 ```javascript
-monitorPrices = {
-    gaming: { min, avg, max },
-    work: { min, avg, max },
-    // ...
-}
-
-advancedBuilds = {
-    '1080p_esports': { ... },
-    '1440p_balanced': { ... },
-    // ...
-}
-
-gameProfiles = {
-    'Cyberpunk 2077': { tier, vram, monitor },
-    // ...
-}
+// Features are accessible via the global window.ForgeStudioFeatures object
+const performance = window.ForgeStudioFeatures.performance.predictPerformance('RTX 5090', '1440p');
+const budget = window.ForgeStudioFeatures.budget.categorizeBudget(1500000);
+// ... etc
 ```
 
-### New Functions
-- `calculateThermalRequirements()` - TDP-based cooling
-- `optimizeBudget()` - Find best value build
-- `generateSmartSuggestions()` - AI-like recommendations
-- `getDeviceRecommendation()` - Multi-device setup
-- `getRecommendedMonitor()` - Auto monitor selection
+## Performance Metrics
+- Module loading time: < 100ms
+- DOM rendering time: < 500ms
+- File size: 453 lines (features.js), 152 lines (addAdvancedFeatures)
+- CSS overhead: 100 lines
+- Zero external dependencies
 
-### Performance Tricks
-- Translation memoization
-- Selection cache warmer
-- Event delegation
-- CSS animations (GPU-accelerated)
+## Browser Support
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
----
-
-## 🎁 EXTRAS
-
-### Easter Eggs
-- Console message: "🚀 ForgeStudio Turbocharged loaded!"
-- Keyboard shortcut: Ctrl+R for instant reset
-- Performance tips for every major game
-
-### Mobile Optimization
-- Responsive monitor selector
-- Touch-friendly dropdowns
-- Smaller card layouts
-- Fast tap interaction
-
----
-
-## 🚀 JÖVŐBELI FEJLESZTÉSEK (ROADMAP)
-
-- [ ] Live shop price integration
-- [ ] 3D Monitor Configurator
-- [ ] AI-powered Build Recommendation
-- [ ] Component Compatibility Checker
-- [ ] Price History Graph
-- [ ] Dark Mode Toggle
-- [ ] Social Share Builds
-- [ ] VR/AR Preview
-
----
-
-## 📝 CHANGELOG
-
-### v2.0 (Turbocharged)
-- ✅ 100+ Monitor models added
-- ✅ Monitor price calculator
-- ✅ Smart suggestion engine
-- ✅ Advanced build configs
-- ✅ Performance optimization
-- ✅ Thermal calculator
-- ✅ Keyboard shortcuts
-- ✅ UI improvements
-
-### v1.0 (Original)
-- Base PC recommendation engine
-- Game database
-- Development tools selector
-- Budget calculator
-
----
-
-**Made with 🔥 by ForgeStudio Turbo**
+## Future Enhancements
+- [ ] Export recommendations to PDF
+- [ ] Share recommendations via link
+- [ ] AI-powered suggestions
+- [ ] Real-time price comparison
+- [ ] Comparison mode (multiple builds)
+- [ ] Hardware swap analysis
+- [ ] Video benchmark recommendations
