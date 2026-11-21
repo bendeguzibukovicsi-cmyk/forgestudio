@@ -1,0 +1,1748 @@
+const form = document.querySelector('#planner-form');
+const resolutionField = document.querySelector('#resolution-field');
+const consoleField = document.querySelector('#console-field');
+const storageField = document.querySelector('#storage-field');
+const result = document.querySelector('#result');
+const message = document.querySelector('#form-message');
+const gameGrid = document.querySelector('#game-grid');
+const gameSearch = document.querySelector('#game-search');
+const gameSuggestions = document.querySelector('#game-suggestions');
+const consoleSelect = document.querySelector('#console');
+const monitorSelect = document.querySelector('#monitor-select');
+const previewContent = document.querySelector('#preview-content');
+const previewStatus = document.querySelector('#preview-status');
+
+const monitorPrices = {
+    'gaming': { min: 150000, avg: 250000, max: 500000 },
+    'work': { min: 120000, avg: 200000, max: 400000 },
+    'both': { min: 250000, avg: 450000, max: 1000000 },
+    'ultrawide': { min: 200000, avg: 350000, max: 600000 },
+    '4k': { min: 300000, avg: 500000, max: 800000 }
+};
+
+Object.entries(developmentStacks).forEach(([profile, names]) => {
+    names.forEach((name) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'stack';
+        input.value = name;
+        input.dataset.profile = profile;
+        label.append(input, document.createTextNode(name));
+        document.querySelector('#stack-grid').append(label);
+    });
+});
+
+const builds = [
+    {
+        name: 'Full HD játékos PC',
+        price: 350000,
+        description: 'Kiindulópont 1080p-s játékhoz, játéktól és beállításoktól függően.',
+        parts: [
+            ['Processzor', 'AMD Ryzen 5 5600'],
+            ['Videókártya', 'AMD Radeon RX 7600 8GB'],
+            ['Alaplap', 'AMD B550 alaplap AM4'],
+            ['Memória', '16GB DDR4 3200MHz RAM 2x8GB'],
+            ['Tárhely', '1TB NVMe SSD PCIe 4.0'],
+            ['Tápegység', '650W 80 Plus Bronze tápegység'],
+            ['Gépház', 'ATX ház jó szellőzéssel']
+        ]
+    },
+    {
+        name: 'Erősebb játékos PC',
+        price: 550000,
+        description: 'Erősebb kiindulópont igényesebb játékokhoz és 1440p-s felbontáshoz.',
+        parts: [
+            ['Processzor', 'AMD Ryzen 5 7600'],
+            ['Videókártya', 'AMD Radeon RX 7700 XT 12GB'],
+            ['Alaplap', 'AMD B650 alaplap AM5'],
+            ['Memória', '32GB DDR5 6000MHz RAM 2x16GB'],
+            ['Tárhely', '1TB NVMe SSD PCIe 4.0'],
+            ['Tápegység', '750W 80 Plus Gold tápegység'],
+            ['Gépház', 'ATX ház jó szellőzéssel']
+        ]
+    },
+    {
+        name: '4K játékos PC',
+        price: 900000,
+        description: 'Erős kiindulópont 4K-s játékhoz; az elérhető teljesítmény a beállításoktól is függ.',
+        parts: [
+            ['Processzor', 'AMD Ryzen 7 7800X3D'],
+            ['Processzorhűtő', 'AM5 CPU hűtő Ryzen 7 7800X3D'],
+            ['Videókártya', 'AMD Radeon RX 7900 XTX 24GB'],
+            ['Alaplap', 'AMD B650 alaplap AM5'],
+            ['Memória', '32GB DDR5 6000MHz RAM 2x16GB'],
+            ['Tárhely', '2TB NVMe SSD PCIe 4.0'],
+            ['Tápegység', '850W 80 Plus Gold tápegység'],
+            ['Gépház', 'ATX ház jó szellőzéssel']
+        ]
+    }
+];
+
+const consoleBudgetGuides = {
+    'PlayStation 5 Standard lemezes': 160000,
+    'PlayStation 5 Slim Digital': 160000,
+    'PlayStation 5 Slim Disc': 180000,
+    'PlayStation 5 Pro': 240000,
+    'Xbox Series X 1TB': 170000,
+    'Xbox Series X 2TB Galaxy Black': 200000,
+    'Xbox Series X 1TB Digital': 160000,
+    'Xbox Series S 512GB': 100000,
+    'Xbox Series S 1TB': 120000,
+    'Nintendo Switch 2': 150000,
+    'Nintendo Switch OLED': 100000,
+    'Nintendo Switch V2': 80000,
+    'Nintendo Switch Lite': 60000,
+    'Steam Deck OLED 512GB': 180000,
+    'Steam Deck OLED 1TB': 200000,
+    'ASUS ROG Ally': 150000,
+    'ASUS ROG Ally X': 220000,
+    'Lenovo Legion Go': 170000,
+    'MSI Claw': 150000
+};
+
+const storageOptions = {
+    'PlayStation': {
+        storage: 'PS5 kompatibilis M.2 NVMe SSD PCIe 4.0 hűtőbordával',
+        note: 'Belső bővítéshez PS5-kompatibilis PCIe 4.0 M.2 NVMe SSD-t válassz hűtőbordával. A Sony legalább 5500 MB/s olvasási sebességet ajánl; ellenőrizd a méretre és kapacitásra vonatkozó követelményeket is.'
+    },
+    'Xbox': {
+        storage: 'Xbox Series X S Storage Expansion Card 1TB',
+        note: 'Series X|S játékok futtatásához kompatibilis Storage Expansion Cardot válassz; egy sima USB-s SSD nem helyettesíti ezt.'
+    },
+    'Nintendo': {
+        storage: 'Nintendo Switch microSD kártya',
+        note: 'Switch 2 játékok tárolásához microSD Express kártya szükséges. A korábbi Switch modellek UHS-I microSDXC kártyát használnak; vásárlás előtt ellenőrizd a pontos modellt.'
+    },
+    'Kézi PC': {
+        storage: 'kézi PC kompatibilis NVMe SSD',
+        note: 'Az SSD mérete és cseréjének módja modellenként eltér. A Steam Deck OLED például M.2 2230-at használ, de ne feltételezd, hogy ez minden kézi PC-be illik. Ellenőrizd a gyártó előírásait.'
+    }
+};
+
+// Store all games for search, don't render initially
+const allGamesMap = new Map();
+const gameIndexMap = new Map(); // Map game name to its current index in grid
+const checkedGames = new Set();
+
+Object.entries(gameGroups).forEach(([category, names]) => {
+    names.forEach((name) => {
+        allGamesMap.set(name, category);
+    });
+});
+
+// Store checked state from localStorage
+function saveCheckedGames() {
+    localStorage.setItem('forgestudio-games', JSON.stringify([...checkedGames]));
+}
+
+function loadCheckedGames() {
+    try {
+        const saved = localStorage.getItem('forgestudio-games');
+        if (saved) {
+            JSON.parse(saved).forEach(game => checkedGames.add(game));
+        }
+    } catch (e) {
+        console.error('Failed to load saved games:', e);
+    }
+}
+
+loadCheckedGames();
+
+// Function to render game cards based on search/filter - Turbocharged version
+function renderGameCards(filterText = '') {
+    gameGrid.replaceChildren();
+    gameIndexMap.clear();
+    
+    const lowerFilter = filterText.toLowerCase();
+    const platform = form.elements.platform.value;
+    let cardIndex = 0;
+    
+    Object.entries(gameGroups).forEach(([category, names]) => {
+        names.forEach((name) => {
+            // Platform filtering
+            const gamePlatform = gamePlatforms[name];
+            const isAvailableForPlatform = 
+                (platform === 'pc' && (gamePlatform === 'pc' || gamePlatform === 'both')) ||
+                (platform === 'console' && (gamePlatform === 'ps' || gamePlatform === 'both')) ||
+                (platform !== 'pc' && platform !== 'console');
+            
+            if (!isAvailableForPlatform) {
+                return;
+            }
+            
+            // Smart filtering: search in name and category
+            // Ha van keresési szöveg: akkor csak az illeszkedők
+            // Ha nincs keresési szöveg: akkor csak az előkészített játékok
+            const isChecked = checkedGames.has(name);
+            const matchesFilter = lowerFilter ? (
+                name.toLowerCase().includes(lowerFilter) || 
+                category.toLowerCase().includes(lowerFilter)
+            ) : false;
+            
+            // Ha van keresési szöveg és nem illeszkedik, akkor skip
+            // Ha nincs keresési szöveg és nincs kiválasztva, akkor skip
+            if (lowerFilter && !matchesFilter && !isChecked) {
+                return;
+            }
+            if (!lowerFilter && !isChecked) {
+                return;
+            }
+            
+            const label = document.createElement('label');
+            label.className = 'game-card';
+            
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'game';
+            input.value = name;
+            input.checked = isChecked;
+            
+            // Track current index for this game
+            gameIndexMap.set(name, cardIndex);
+            cardIndex++;
+            
+            input.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    checkedGames.add(name);
+                } else {
+                    checkedGames.delete(name);
+                }
+                saveCheckedGames();
+                filterGames(); // Re-filter to update counts
+                updatePreview(); // Update preview on game selection
+            });
+            
+            const icon = document.createElement('span');
+            icon.className = 'game-icon';
+            icon.textContent = '✦';
+            icon.setAttribute('aria-hidden', 'true');
+            
+            const text = document.createElement('span');
+            const title = document.createElement('strong');
+            title.textContent = name;
+            const subtitle = document.createElement('small');
+            subtitle.textContent = category;
+            const check = document.createElement('span');
+            check.className = 'check';
+            check.textContent = '✓';
+            check.setAttribute('aria-hidden', 'true');
+            
+            text.append(title, subtitle);
+            label.append(input, icon, text, check);
+            gameGrid.append(label);
+        });
+    });
+}
+
+Object.entries(consoleGroups).forEach(([group, names]) => {
+    const options = document.createElement('optgroup');
+    options.label = group;
+    names.forEach((name) => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        option.dataset.group = group;
+        options.append(option);
+    });
+    consoleSelect.append(options);
+});
+
+// Initialize localization only when DOM and translation functions are ready
+function initializeLocalization() {
+    if (typeof localizeTree === 'function' && typeof translate === 'function') {
+        localizeTree(gameGrid);
+        localizeTree(consoleSelect);
+        consoleSelect.querySelectorAll('optgroup').forEach((group) => {
+            group.label = translate(group.label);
+        });
+    }
+}
+
+// Wait for all scripts to load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeLocalization);
+} else {
+    initializeLocalization();
+}
+
+function shoppingLink(query) {
+    const link = document.createElement('a');
+    link.href = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Keresés a boltokban ↗';
+    return link;
+}
+
+function addItem(list, label, name, query = name) {
+    const item = document.createElement('li');
+    const heading = document.createElement('span');
+    heading.textContent = translate(label).toLocaleUpperCase(currentLanguage);
+    const displayedName = currentLanguage === 'en'
+        ? name.replace('A processzorba épített Radeon grafika – külön videókártya nem szükséges', 'Integrated Radeon graphics – no dedicated graphics card required')
+            .replace(/alaplap/g, 'motherboard').replace(/tápegység/g, 'power supply')
+            .replace(/kompatibilis/g, 'compatible').replace(/hűtőbordával/g, 'with heatsink')
+            .replace(/kézi PC/g, 'handheld PC').replace(/kártya/g, 'card')
+            .replace(/magos CPU/g, 'core CPU').replace(/magos GPU/g, 'core GPU')
+            .replace(/lemezes/g, 'disc edition')
+        : name;
+    item.append(heading, document.createTextNode(displayedName), document.createElement('br'), shoppingLink(query));
+    list.append(item);
+}
+
+function addBudgetWarning(container, budget, reference, subject) {
+    if (!budget || budget >= reference) return;
+    const warning = document.createElement('p');
+    warning.className = 'result-warning budget-warning';
+    warning.setAttribute('role', 'alert');
+    const subjects = {
+        'a javasolt PC': 'the suggested PC',
+        'a kiválasztott konzol vagy kézi PC': 'the selected console or handheld PC',
+        'az ajánlott fejlesztői PC': 'the recommended developer PC',
+        'a javasolt PC és az asztali Mac együttes': 'both the suggested PC and desktop Mac',
+        'az ajánlott asztali Mac': 'the recommended desktop Mac'
+    };
+    const formattedBudget = budget.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'hu-HU');
+    const formattedReference = reference.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'hu-HU');
+    warning.textContent = bilingual(
+        `A megadott ${formattedBudget} Ft-os keret várhatóan nem elegendő ${subject} megvásárlásához. A rögzített, hozzávetőleges támpont ${formattedReference} Ft; az árak változhatnak, és használt vagy akciós termék olcsóbb is lehet.`,
+        `The ${formattedBudget} Ft budget is unlikely to cover ${subjects[subject]}. The fixed estimate is ${formattedReference} Ft; prices vary and used or discounted products may cost less.`
+    );
+    container.append(warning);
+}
+
+const cases = {
+    airflow: { name: 'Corsair 4000D Airflow', gpu: 360, cooler: 170, radiators: [120, 140, 240, 280, 360] },
+    glass: { name: 'HYTE Y70', gpu: 422, cooler: 180, radiators: [120, 240, 280, 360] },
+    wood: { name: 'Fractal Design North', gpu: 355, cooler: 170, radiators: [120, 140, 240, 280, 360] },
+    silent: { name: 'be quiet! Silent Base 802', gpu: 432, cooler: 185, radiators: [120, 140, 240, 280, 360, 420] },
+    compact: { name: 'Cooler Master NR200P V2', gpu: 334, cooler: 67, radiators: [120, 140, 240, 280] }
+};
+
+function configureCase(parts, style, compactGpu) {
+    const selected = cases[style];
+    const compact = style === 'compact';
+    const configured = parts.filter(([label]) => label !== 'Gépház');
+    const replace = (label, name) => {
+        const index = configured.findIndex((part) => part[0] === label);
+        if (index >= 0) configured[index] = [label, name];
+        else configured.push([label, name]);
+    };
+    if (compactGpu) replace('Videókártya', compactGpu.name);
+    if (!configured.some(([label]) => label === 'Processzorhűtő') ||
+        configured.some(([label, name]) => label === 'Processzorhűtő' && name.startsWith('AM5 CPU hűtő'))) {
+        replace('Processzorhűtő', 'Thermalright Phantom Spirit 120 SE');
+    }
+    if (compact) {
+        if (configured.some(([label, name]) => label === 'Processzor' && name.includes('5600'))) {
+            replace('Processzor', 'AMD Ryzen 5 7600');
+            replace('Memória', '32GB DDR5 RAM 2x16GB');
+        }
+        replace('Alaplap', 'ASUS ROG STRIX B650E-I GAMING WIFI Mini-ITX AM5');
+        replace('Processzorhűtő', 'Cooler Master MasterLiquid 240L Core II 240mm AIO');
+        replace('Tápegység', 'Corsair SF1000 SFX 1000W ATX 3.1');
+    }
+    configured.push(['Gépház', selected.name]);
+    const coolerName = configured.find(([label]) => label === 'Processzorhűtő')[1];
+    const coolerHeight = coolerName.includes('NH-D15 G2') ? 168 : coolerName.includes('NH-U12A') ? 158 : coolerName.includes('Phantom Spirit 120 SE') ? 154 : null;
+    return { parts: configured, selected, compact, gpuLength: compactGpu?.length, coolerHeight, hasGpu: configured.some(([label]) => label === 'Videókártya') };
+}
+
+function addCaseNote(container, caseBuild) {
+    const note = document.createElement('p');
+    note.className = 'result-note';
+    const gpuCheck = !caseBuild.hasGpu
+        ? 'Az ajánlás integrált grafikát használ, külön videókártya nélkül.'
+        : caseBuild.gpuLength
+        ? `A megadott GPU ${caseBuild.gpuLength} mm, a ház konzervatív határa ${caseBuild.selected.gpu} mm.`
+        : `A GPU pontos modellje nélkül a ${caseBuild.selected.gpu} mm-es hosszkorlát nem ellenőrizhető.`;
+    const coolerCheck = caseBuild.compact
+        ? 'A 240 mm-es AIO-radiátor támogatott, a 59,4 mm-es pumpa a 67 mm-es magassághatár alatt van.'
+        : caseBuild.coolerHeight
+            ? `A léghűtő ${caseBuild.coolerHeight} mm magas, a ház határa ${caseBuild.selected.cooler} mm; a RAM miatti ventilátorhelyzetet is ellenőrizd.`
+            : `A léghűtő magassága ismeretlen, a ház határa ${caseBuild.selected.cooler} mm.`;
+    const gpuCheckEn = !caseBuild.hasGpu
+        ? 'The build uses integrated graphics, without a dedicated graphics card.'
+        : caseBuild.gpuLength
+            ? `The specified GPU is ${caseBuild.gpuLength} mm long; the conservative case limit is ${caseBuild.selected.gpu} mm.`
+            : `Without an exact GPU model, the ${caseBuild.selected.gpu} mm length limit cannot be verified.`;
+    const coolerCheckEn = caseBuild.compact
+        ? 'A 240 mm AIO radiator is supported; the 59.4 mm pump is below the 67 mm height limit.'
+        : caseBuild.coolerHeight
+            ? `The air cooler is ${caseBuild.coolerHeight} mm tall; the case limit is ${caseBuild.selected.cooler} mm. Also check fan clearance over the RAM.`
+            : `The air cooler height is unknown; the case limit is ${caseBuild.selected.cooler} mm.`;
+    note.textContent = bilingual(
+        `${caseBuild.compact ? 'Mini-ITX alaplap és SFX tápegység szükséges.' : 'Normál ATX alaplaphoz választott ház.'} ${gpuCheck} ${coolerCheck} A hátra csatlakozós BTF / Project Zero alaplap támogatása itt nincs igazolva; normál csatlakozású alaplapot válassz. Ellenőrizd a kábelek, radiátor, ventilátorok és az adott alkatrészváltozat tényleges helyigényét vásárlás előtt.`,
+        `${caseBuild.compact ? 'A Mini-ITX motherboard and SFX power supply are required.' : 'The case is selected for a standard ATX motherboard.'} ${gpuCheckEn} ${coolerCheckEn} Rear-connector BTF / Project Zero motherboard support has not been verified; choose a standard motherboard. Check actual cable, radiator, fan and component clearances before buying.`
+    );
+    container.append(note);
+}
+
+function addRecommendationCard(cards, title, description, products) {
+    const card = document.createElement('article');
+    card.className = 'recommended-card';
+    const cardTitle = document.createElement('h5');
+    cardTitle.textContent = title;
+    const detail = document.createElement('p');
+    detail.textContent = description;
+    card.append(cardTitle, detail);
+    products.forEach((product) => {
+        const name = document.createElement('strong');
+        name.textContent = product;
+        card.append(name, shoppingLink(product));
+    });
+    cards.append(card);
+}
+
+function addRecommendedSet(container, platform, resolution, consoleOption, selectedGames) {
+    const section = document.createElement('section');
+    section.className = 'recommended-set';
+    const heading = document.createElement('h4');
+    heading.textContent = 'Ajánlott szett a gépedhez';
+    const intro = document.createElement('p');
+    intro.textContent = 'Példák a választásaid alapján; a perifériák nincsenek benne a gép becsült árában.';
+    const cards = document.createElement('div');
+    cards.className = 'recommended-grid';
+
+    if (platform === 'pc') {
+        const monitors = {
+            '1080': ['AOC 24G4X', '23,8″ Full HD · 180 Hz · Fast IPS'],
+            '1440': ['ASUS ROG Strix XG27ACS', '27″ QHD · 180 Hz · Fast IPS'],
+            '4k': ['Gigabyte M28U', '28″ 4K · 144 Hz · IPS · HDMI 2.1']
+        };
+        const [monitor, details] = monitors[resolution];
+        addRecommendationCard(cards, 'Monitor', bilingual(`${details}. A tényleges FPS játéktól és beállításoktól függ.`, `${details.replace('23,8', '23.8')}. Actual FPS depends on the game and settings.`), [monitor]);
+    } else if (consoleOption.value === 'Nintendo Switch Lite') {
+        addRecommendationCard(cards, 'Monitor', 'A Switch Lite saját kijelzőt használ, és nem támogat külső monitort.', []);
+    } else {
+        const note = consoleOption.dataset.group === 'PlayStation' || consoleOption.dataset.group === 'Xbox'
+            ? '28″ 4K · 144 Hz · IPS · HDMI 2.1; alkalmas 4K/120 Hz bemenetre és VRR-re. A játékok tényleges felbontása és képfrissítése eltérhet.'
+            : '28″ 4K · 144 Hz · IPS · HDMI 2.1. A külső kijelzőhöz megfelelő dokkoló vagy adapter szükséges; a kimenet felbontása és képfrissítése modelltől függ.';
+        addRecommendationCard(cards, 'Monitor', note, ['Gigabyte M28U']);
+    }
+
+    if (platform === 'pc') {
+        const esports = selectedGames.some((game) => ['Counter-Strike 2', 'Valorant'].includes(game));
+        const mmo = selectedGames.some((game) => gameGroups['MMO / MMORPG'].includes(game));
+        const mice = [];
+        if (esports) mice.push('Razer Viper V3 Pro');
+        if (mmo) mice.push('Razer Naga V2 Pro');
+        if (!mice.length) mice.push('Logitech G502 X Lightspeed');
+        const keyboard = esports ? 'Wooting 60HE+' : 'Keychron V1 Max';
+        const detail = esports && mmo
+            ? 'E-sporthoz 54–55 g-os egér és Hall-Effect billentyűzet; MMO-hoz a második, sokgombos egér alternatíva.'
+            : esports
+                ? 'E-sporthoz 54–55 g-os egér és Hall-Effect billentyűzet Rapid Trigger funkcióval.'
+                : mmo
+                    ? 'Sokgombos MMO-egér és mechanikus billentyűzet.'
+                    : 'Általános játékhoz vezeték nélküli egér és mechanikus billentyűzet.';
+        addRecommendationCard(cards, 'Egér + billentyűzet', detail, [...mice, keyboard]);
+    } else {
+        const detail = consoleOption.dataset.group === 'Kézi PC'
+            ? 'A kézi PC beépített vezérlővel is használható; egérhez és billentyűzethez megfelelő csatlakozás vagy dokkoló szükséges. A játékok kezelése eltérhet.'
+            : 'Konzolon a vezérlő az alapértelmezett; az egér és billentyűzet támogatása platformonként és játékonként eltér. Ellenőrizd a kiválasztott modell és játék támogatását.';
+        addRecommendationCard(cards, 'Egér + billentyűzet', detail, []);
+    }
+
+    const headset = platform === 'pc' || consoleOption.dataset.group === 'Nintendo' || consoleOption.dataset.group === 'Kézi PC'
+        ? ['HyperX Cloud III', 'Vezetékes, 3,5 mm-es headset; ellenőrizd a készülék csatlakozóját.']
+        : consoleOption.dataset.group === 'PlayStation'
+            ? ['Sony PlayStation Pulse Elite', 'PS5-kompatibilis vezeték nélküli headset PlayStation Link USB-adapterrel.']
+            : ['Microsoft Xbox Wireless Headset', 'Xbox Series X|S kompatibilis vezeték nélküli headset.'];
+    addRecommendationCard(cards, 'Headset', headset[1], [headset[0]]);
+    section.append(heading, intro, cards);
+    container.append(section);
+}
+
+function renderWorkRecommendation(profiles, budget, stacks) {
+    const has = (profile) => profiles.includes(profile);
+    const demanding = has('game') || has('ai') || has('security') || has('devops') || has('data');
+    const highMemory = demanding || has('android');
+    const onlyMac = has('ios') && !demanding;
+    const selectedNames = profiles.map((profile) => {
+        return form.querySelector(`input[name="profile"][value="${profile}"]`).closest('label').querySelector('strong').textContent;
+    });
+
+    result.replaceChildren();
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = '✦  A TE FEJLESZTŐI AJÁNLÁSOD';
+    const heading = document.createElement('h3');
+    heading.textContent = onlyMac ? 'Mac fejlesztői gép' : 'Fejlesztői munkaállomás';
+    const intro = document.createElement('p');
+    intro.className = 'result-intro';
+    intro.textContent = bilingual(
+        `Figyelembe vett területek: ${selectedNames.join(', ')}.${stacks.length ? ` Technológiák: ${stacks.join(', ')}.` : ''} Az összeállítás példa, nem élő árakat használ.`,
+        `Areas considered: ${selectedNames.join(', ')}.${stacks.length ? ` Technologies: ${stacks.join(', ')}.` : ''} This is an example build, not live pricing.`
+    );
+    result.append(eyebrow, heading, intro);
+
+    if (onlyMac) {
+        const note = document.createElement('p');
+        note.className = 'result-note';
+        note.textContent = 'A gépházválasztás a kész Mac gépre nem vonatkozik.';
+        result.append(note);
+    }
+
+    if (!onlyMac) {
+        const baseBudget = has('security') ? 650000 : demanding ? 500000 : has('android') ? 320000 : 250000;
+        const pcBudget = baseBudget + (has('ai') ? 1500000 : has('game') ? 500000 : stacks.includes('Hashcat') ? 300000 : 0);
+        addBudgetWarning(result, budget, pcBudget, 'az ajánlott fejlesztői PC');
+        if (has('ios')) {
+            const macBudget = has('security') || has('data') ? 1800000 : 1100000;
+            addBudgetWarning(result, budget, pcBudget + macBudget, 'a javasolt PC és az asztali Mac együttes');
+        }
+        const cpu = demanding ? 'AMD Ryzen 9 9950X' : has('android') ? 'AMD Ryzen 7 9700X' : 'AMD Ryzen 5 7600';
+        const parts = [
+            ['Processzor', cpu],
+            ['Processzorhűtő', demanding ? 'Noctua NH-D15 G2' : 'Noctua NH-U12A'],
+            ['Alaplap', has('data') ? 'ASUS ROG STRIX B650E-F GAMING WIFI ATX AM5' : 'AMD B650 ATX alaplap AM5'],
+            ['Memória', has('security') || has('data') ? '96GB DDR5 RAM 2x48GB' : highMemory ? '64GB DDR5 RAM 2x32GB' : '32GB DDR5 RAM 2x16GB'],
+            ['Tárhely', `Samsung ${has('data') ? '9100' : '990'} Pro ${has('game') ? '4TB' : demanding || has('android') ? '2TB' : '1TB'} NVMe SSD`]
+        ];
+        if (has('security')) parts.push(['Második tárhely', 'Samsung 990 Pro 2TB NVMe SSD']);
+        if (has('ai')) parts.push(['Videókártya', 'NVIDIA GeForce RTX 5090 32GB']);
+        else if (has('game')) parts.push(['Videókártya', 'NVIDIA GeForce RTX 4080 SUPER 16GB']);
+        else if (stacks.includes('Hashcat')) parts.push(['Videókártya', 'NVIDIA GeForce RTX 4070 Ti Super 16GB']);
+        else parts.push(['Grafika', 'A processzorba épített Radeon grafika – külön videókártya nem szükséges', cpu]);
+        parts.push(
+            ['Tápegység', has('ai') ? '1200W ATX 3.1 80 Plus Gold tápegység 12V-2x6' : has('game') || stacks.includes('Hashcat') ? '850W ATX 3.1 80 Plus Gold tápegység' : '650W 80 Plus Gold tápegység'],
+            ['Gépház', 'Fractal Design Meshify 2']
+        );
+        const caseStyle = document.querySelector('#case-style').value;
+        const gpu = has('ai')
+            ? { name: 'NVIDIA GeForce RTX 5090 Founders Edition 32GB', length: 304 }
+            : has('game')
+                ? { name: 'ASUS ProArt GeForce RTX 4080 SUPER 16GB', length: 300 }
+                : stacks.includes('Hashcat')
+                ? { name: 'ASUS ProArt GeForce RTX 4070 Ti SUPER 16GB', length: 300 }
+                : null;
+        const caseBuild = configureCase(parts, caseStyle, gpu);
+        const list = document.createElement('ul');
+        list.className = 'result-list';
+        caseBuild.parts.forEach(([label, name, query]) => addItem(list, label, name, query));
+        result.append(list);
+        addCaseNote(result, caseBuild);
+        if (has('data')) {
+            const note = document.createElement('p');
+            note.className = 'result-note';
+            note.textContent = 'A PCIe 5.0-s SSD-t a megfelelő M.2 foglalatba szereld; ellenőrizd az SSD és az alaplapi hűtőborda illeszkedését.';
+            result.append(note);
+        }
+        if (caseBuild.compact) {
+            const note = document.createElement('p');
+            note.className = 'result-warning';
+            note.textContent = 'A kompakt változat eltér a korábbi PC-s ártámponttól. A hűtő, memória, kábelek és alaplap pontos illeszkedését, valamint nagy terhelés mellett a hőmérsékletet ellenőrizni kell; szükség lehet CPU-teljesítménykorlátozásra.';
+            result.append(note);
+        }
+        const note = document.createElement('p');
+        note.className = 'result-note';
+        note.textContent = 'Ellenőrizd az alaplap BIOS-verzióját, a kétmodulos RAM-készlet támogatását, az SSD-foglalatokat, valamint a hűtő és videókártya házba illeszkedését. A ventilátorgörbe és a terhelés befolyásolja a zajt.';
+        result.append(note);
+    }
+
+    const mac = document.createElement('details');
+    mac.className = 'mac-alternative';
+    mac.open = has('ios');
+    const summary = document.createElement('summary');
+    summary.textContent = has('ios') ? 'Mac ajánlás iOS fejlesztéshez' : 'Mac alternatíva';
+    const macList = document.createElement('ul');
+    macList.className = 'result-list';
+    const macModel = has('security') || has('data')
+        ? 'Mac Studio M4 Max 16 magos CPU 40 magos GPU 128GB 2TB'
+        : demanding || has('android')
+            ? 'Mac mini M4 Pro 64GB 2TB'
+            : 'Mac mini M4 Pro 48GB 1TB';
+    const macBook = demanding || has('android')
+        ? `MacBook Pro 14 M4 Max 16 magos CPU 40 magos GPU ${has('security') || has('data') ? '128GB' : '64GB'} 2TB`
+        : 'MacBook Pro 14 M4 Pro 48GB 1TB';
+    addItem(macList, 'Asztali Mac', macModel);
+    addItem(macList, 'Hordozható alternatíva', macBook);
+    const macNote = document.createElement('p');
+    macNote.className = 'result-note';
+    macNote.textContent = 'Az iOS-alkalmazások Xcode-dal való fejlesztéséhez macOS szükséges. A keretellenőrzés az asztali Macre vonatkozik; a hordozható változat árát külön ellenőrizd. A Mac egységes memóriája vásárlás után nem bővíthető; az Apple Siliconon a virtuális gépek és eszközök architektúra-támogatását ellenőrizd.';
+    mac.append(summary);
+    const macBudget = has('security') || has('data') ? 1800000 : demanding || has('android') ? 1100000 : 800000;
+    addBudgetWarning(mac, budget, macBudget, 'az ajánlott asztali Mac');
+    mac.append(macList, macNote);
+    if (has('ai')) {
+        const warning = document.createElement('p');
+        warning.className = 'result-warning';
+        warning.textContent = 'A Mac nem támogatja az NVIDIA CUDA-t: a CUDA-t igénylő AI-feladatokhoz a fenti NVIDIA-s PC vagy külön távoli gép szükséges. A helyi AI-modellek támogatása és memóriaigénye eltérhet.';
+        mac.append(warning);
+    }
+    if (has('game')) {
+        const warning = document.createElement('p');
+        warning.className = 'result-note';
+        warning.textContent = 'A Mac GPU-ja és a támogatott fejlesztői funkciók nem azonosak a PC-s videókártyáéval; ellenőrizd a motor és a projekt követelményeit.';
+        mac.append(warning);
+    }
+    result.append(mac);
+
+    const section = document.createElement('section');
+    section.className = 'recommended-set';
+    const setHeading = document.createElement('h4');
+    setHeading.textContent = 'Ajánlott programozói szett';
+    const setIntro = document.createElement('p');
+    setIntro.textContent = 'Példák munkához; a perifériák külön vásárolhatók meg.';
+    const cards = document.createElement('div');
+    cards.className = 'recommended-grid';
+    addRecommendationCard(cards, 'Monitor', '27″ 4K IPS Black kijelző USB-C dokkolóval a nagy munkaterülethez.', ['Dell UltraSharp U2723QE']);
+    addRecommendationCard(cards, 'Billentyűzet', 'Alacsony profilú mechanikus billentyűzet gépeléshez.', ['Keychron K3 Max']);
+    addRecommendationCard(cards, 'Egér', 'Ergonomikus egér görgető- és oldalsó kerékkel.', ['Logitech MX Master 3S']);
+    section.append(setHeading, setIntro, cards);
+    result.append(section);
+
+    const disclaimer = document.createElement('p');
+    disclaimer.className = 'result-note';
+    disclaimer.textContent = 'Az összeállítás és a kerethez használt alsó támpontok iránymutatók, nem élő árak vagy teljesítménygaranciák. Az árakhoz és elérhetőséghez nyisd meg a bolti kereséseket; ellenőrizd a szoftverek támogatását és az alkatrészek kompatibilitását. A perifériák, az operációs rendszer és az összeszerelés külön költséget jelentenek.';
+    result.append(disclaimer);
+    localizeTree(result);
+    result.hidden = false;
+    if (!languageRefresh) result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+const rockstarNames = new Set(rockstarGames);
+let activeSuggestion = -1;
+let languageRefresh = false;
+
+function closeGameSuggestions() {
+    gameSuggestions.hidden = true;
+    gameSearch.setAttribute('aria-expanded', 'false');
+    gameSearch.removeAttribute('aria-activedescendant');
+    activeSuggestion = -1;
+}
+
+function fuzzyMatch(str, pattern) {
+    const lowerStr = str.toLowerCase();
+    const lowerPattern = pattern.toLowerCase();
+    
+    if (lowerPattern === '') return true;
+    
+    let strIndex = 0;
+    let patternIndex = 0;
+    let score = 0;
+    
+    while (strIndex < lowerStr.length && patternIndex < lowerPattern.length) {
+        if (lowerStr[strIndex] === lowerPattern[patternIndex]) {
+            score += 1;
+            patternIndex++;
+        }
+        strIndex++;
+    }
+    
+    return patternIndex === lowerPattern.length ? score : 0;
+}
+
+function getGameAliases(gameName) {
+    const name = gameName.toLowerCase();
+    const aliases = [];
+    
+    if (rockstarNames.has(gameName)) aliases.push('rockstar');
+    if (name.includes('grand theft auto')) {
+        aliases.push('gta');
+        if (name.includes('vi')) aliases.push('gta 6');
+        if (name.includes('v') && !name.includes('vi')) aliases.push('gta 5');
+        if (name.includes('iv')) aliases.push('gta 4');
+        if (name.includes('iii')) aliases.push('gta 3');
+    }
+    if (name.includes('red dead')) {
+        aliases.push('rdr');
+        if (name.includes('redemption 2')) aliases.push('rdr2');
+    }
+    if (name.includes('call of duty')) aliases.push('cod');
+    if (name.includes('valorant')) aliases.push('val');
+    if (name.includes('counter-strike')) aliases.push('cs');
+    if (name.includes('escape from tarkov')) aliases.push('eft');
+    if (name.includes('dark souls')) aliases.push('ds');
+    if (name.includes('elden ring')) aliases.push('er');
+    if (name.includes('monster hunter')) aliases.push('mh');
+    if (name.includes('league of legends')) aliases.push('lol');
+    if (name.includes('dota')) aliases.push('dota 2');
+    if (name.includes('world of warcraft')) aliases.push('wow');
+    if (name.includes('final fantasy')) aliases.push('ff');
+    
+    return aliases;
+}
+
+function filterGames() {
+    const query = gameSearch.value.trim();
+    
+    if (!query) {
+        gameGrid.replaceChildren();
+        gameSuggestions.replaceChildren();
+        activeSuggestion = -1;
+        gameSearch.removeAttribute('aria-activedescendant');
+        
+        const count = document.querySelector('#game-count');
+        if (count) count.textContent = '';
+        return;
+    }
+    
+    renderGameCards(query);
+    
+    const gameCards = [...gameGrid.querySelectorAll('.game-card')];
+    let matches = 0;
+    let selected = 0;
+    
+    const matchedGames = [];
+    
+    gameSuggestions.replaceChildren();
+    activeSuggestion = -1;
+    gameSearch.removeAttribute('aria-activedescendant');
+    
+    gameCards.forEach((card) => {
+        const input = card.querySelector('input');
+        const checked = input.checked;
+        const gameName = input.value;
+        const name = gameName.toLowerCase();
+        const queryLower = query.toLowerCase();
+        
+        const aliases = getGameAliases(gameName);
+        
+        const exactMatch = name.includes(queryLower);
+        const startsWith = name.startsWith(queryLower);
+        const aliasMatch = aliases.some(a => a.includes(queryLower));
+        const fuzzyScore = fuzzyMatch(name, queryLower);
+        
+        const matchesQuery = exactMatch || aliasMatch || fuzzyScore > 0;
+        
+        if (checked) selected++;
+        
+        if (matchesQuery) {
+            matches++;
+            matchedGames.push({
+                card,
+                input,
+                name: gameName,
+                checked,
+                score: (startsWith ? 1000 : 0) + (exactMatch ? 500 : 0) + (aliasMatch ? 250 : 0) + fuzzyScore
+            });
+        }
+        
+        card.hidden = !(checked || (query && matchesQuery));
+    });
+    
+    matchedGames.sort((a, b) => b.score - a.score);
+    
+    matchedGames.forEach((item, idx) => {
+        if (!item.checked) {
+            const option = document.createElement('div');
+            option.id = `game-option-${idx}`;
+            option.className = 'game-suggestion';
+            option.setAttribute('role', 'option');
+            option.setAttribute('aria-selected', 'false');
+            option.dataset.gameName = item.name;
+            
+            const title = document.createElement('strong');
+            title.textContent = item.name;
+            const category = document.createElement('span');
+            category.textContent = item.card.querySelector('small').textContent;
+            option.append(title, category);
+            gameSuggestions.append(option);
+        }
+    });
+    
+    if (query && !gameSuggestions.children.length) {
+        const empty = document.createElement('div');
+        empty.className = 'game-suggestion-empty';
+        empty.textContent = matches
+            ? bilingual('Az összes találat már ki van választva.', 'All matching games are already selected.')
+            : bilingual('Nincs találat.', 'No results.');
+        gameSuggestions.append(empty);
+    }
+    
+    gameSuggestions.hidden = !query;
+    gameSearch.setAttribute('aria-expanded', String(Boolean(query)));
+    if (typeof localizeTree === 'function') {
+        localizeTree(gameSuggestions);
+    }
+    
+    document.querySelector('#game-count').textContent = query
+        ? bilingual(`${matches} találat · ${selected} kiválasztva`, `${matches} results · ${selected} selected`)
+        : bilingual(`${selected} kiválasztva`, `${selected} selected`);
+}
+
+function selectGame(option) {
+    const gameName = option.dataset.gameName;
+    // Find the input by game name instead of index
+    const input = gameGrid.querySelector(`input[value="${gameName}"]`);
+    if (input) {
+        input.checked = true;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        gameSearch.value = '';
+        filterGames();
+        gameSearch.focus();
+    }
+}
+
+gameSearch.addEventListener('input', debounce(filterGames, 150));
+gameSearch.addEventListener('focus', filterGames);
+gameSearch.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeGameSuggestions();
+        return;
+    }
+    if (gameSuggestions.hidden) {
+        if (event.key === 'ArrowDown' && gameSearch.value.trim()) {
+            event.preventDefault();
+            filterGames();
+        } else {
+            return;
+        }
+    }
+    const options = [...gameSuggestions.querySelectorAll('[role="option"]')];
+    if (!options.length) {
+        if (event.key === 'Enter') event.preventDefault();
+        return;
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeSuggestion = event.key === 'ArrowDown'
+            ? Math.min(activeSuggestion + 1, options.length - 1)
+            : activeSuggestion <= 0 ? options.length - 1 : activeSuggestion - 1;
+        options.forEach((option, index) => option.setAttribute('aria-selected', String(index === activeSuggestion)));
+        gameSearch.setAttribute('aria-activedescendant', options[activeSuggestion].id);
+        options[activeSuggestion].scrollIntoView({ block: 'nearest' });
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        selectGame(options[Math.max(activeSuggestion, 0)]);
+    }
+});
+gameSuggestions.addEventListener('mousedown', (event) => event.preventDefault());
+gameSuggestions.addEventListener('click', (event) => {
+    const option = event.target.closest('[role="option"]');
+    if (option) selectGame(option);
+});
+document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.game-search')) closeGameSuggestions();
+});
+gameSearch.addEventListener('focusout', (event) => {
+    if (event.relatedTarget && !event.relatedTarget.closest('.game-search')) closeGameSuggestions();
+});
+
+// Debounce utility for performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+document.querySelector('#budget').addEventListener('input', () => {
+    result.hidden = true;
+});
+gameGrid.addEventListener('change', (event) => {
+    filterGames();
+    if (event.target.closest('.game-card').hidden) gameSearch.focus();
+});
+
+// Initialize empty game grid - only show games when searching
+gameGrid.replaceChildren();
+document.querySelector('#game-count').textContent = '';
+
+form.addEventListener('change', () => {
+    const platform = form.elements.platform.value;
+    const isWork = platform === 'work';
+    document.querySelector('#game-step').hidden = isWork;
+    document.querySelector('#work-step').hidden = !isWork;
+    resolutionField.hidden = platform !== 'pc';
+    consoleField.hidden = platform !== 'console';
+    storageField.hidden = platform !== 'console';
+    document.querySelector('#case-field').hidden = platform === 'console';
+    result.hidden = true;
+    message.textContent = '';
+    
+    // Re-render games when platform changes (to filter by platform availability)
+    if (platform === 'pc' || platform === 'console') {
+        const currentQuery = gameSearch.value.trim();
+        if (currentQuery) {
+            renderGameCards(currentQuery);
+        } else {
+            gameGrid.replaceChildren();
+        }
+    }
+});
+
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const budget = Number(document.querySelector('#budget').value);
+    if (form.elements.platform.value === 'work') {
+        const selectedStacks = [...form.querySelectorAll('input[name="stack"]:checked')];
+        const profiles = [...new Set([
+            ...[...form.querySelectorAll('input[name="profile"]:checked')].map((input) => input.value),
+            ...selectedStacks.map((input) => input.dataset.profile)
+        ])];
+        if (profiles.length === 0) {
+            message.textContent = bilingual('Válassz ki legalább egy fejlesztési területet!', 'Choose at least one development area!');
+            result.hidden = true;
+            return;
+        }
+        message.textContent = '';
+        renderWorkRecommendation(profiles, budget, selectedStacks.map((input) => input.value));
+        return;
+    }
+    const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
+    if (selectedGames.length === 0) {
+        message.textContent = bilingual('Válassz ki legalább egy játékot!', 'Choose at least one game!');
+        result.hidden = true;
+        return;
+    }
+
+    message.textContent = '';
+    const platform = form.elements.platform.value;
+    const selectedResolution = document.querySelector('#resolution').value;
+    const withStorage = document.querySelector('#storage').value === 'ssd';
+    let title, description, estimatedPrice, storageNote, caseBuild;
+    const list = document.createElement('ul');
+    list.className = 'result-list';
+
+    if (platform === 'pc') {
+        const resolutionLevel = { '1080': 0, '1440': 1, '4k': 2 }[selectedResolution];
+        const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
+        const build = builds[level];
+        title = build.name;
+        description = build.description;
+        const caseStyle = document.querySelector('#case-style').value;
+        const compactGpus = [
+            { name: 'Sapphire PULSE Radeon RX 7600 8GB', length: 240 },
+            { name: 'Sapphire PULSE Radeon RX 7700 XT 12GB', length: 280 },
+            { name: 'Sapphire PULSE Radeon RX 7900 XTX 24GB', length: 313 }
+        ];
+        caseBuild = configureCase(build.parts, caseStyle, compactGpus[level]);
+        estimatedPrice = build.price;
+        caseBuild.parts.forEach(([label, name]) => addItem(list, label, name));
+    } else {
+        const option = consoleSelect.selectedOptions[0];
+        const storageChoice = storageOptions[option.dataset.group];
+        title = option.value;
+        description = 'A kiválasztott konzol vagy kézi PC.';
+        addItem(list, 'Konzol / kézi PC', title);
+        if (withStorage) {
+            let storageQuery = storageChoice.storage;
+            if (option.dataset.group === 'Nintendo') {
+                storageQuery = option.value === 'Nintendo Switch 2' ? 'Nintendo Switch 2 microSD Express' : 'Nintendo Switch UHS-I microSDXC';
+            } else if (option.dataset.group === 'Kézi PC') {
+                storageQuery = `${option.value} kompatibilis SSD`;
+            }
+            addItem(list, 'Tárhelybővítés', storageQuery);
+            storageNote = storageChoice.note;
+        }
+    }
+
+    result.replaceChildren();
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = '✦  A TE AJÁNLÁSOD';
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    const intro = document.createElement('p');
+    intro.className = 'result-intro';
+    intro.textContent = bilingual(
+        `${description} Választott játékok: ${selectedGames.join(', ')}.`,
+        `${translate(description)} Selected games: ${selectedGames.join(', ')}.`
+    );
+    
+    // Calculate all costs for detailed price breakdown
+    const costs = calculateTotalCost();
+    
+    const price = document.createElement('p');
+    const monitorType = monitorSelect.value;
+    
+    // Detailed price breakdown
+    let priceBreakdown = `
+        <div style="background: rgba(82, 183, 136, 0.1); padding: 12px; border-radius: 8px; margin: 10px 0;">
+            <strong style="color: #52b788;">💰 Teljes költségvetés (minden beleértve):</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 13px;">
+                <div>💻 PC/Hardware: <strong>${costs.hardware.toLocaleString('hu-HU')} Ft</strong></div>
+    `;
+    
+    if (costs.monitor > 0) {
+        priceBreakdown += `<div>🖥️ Monitor: <strong>${costs.monitor.toLocaleString('hu-HU')} Ft</strong></div>`;
+    }
+    
+    if (costs.peripherals > 0) {
+        priceBreakdown += `<div>🖱️ Perifériák: <strong>${costs.peripherals.toLocaleString('hu-HU')} Ft</strong></div>`;
+    }
+    
+    if (costs.storage > 0) {
+        priceBreakdown += `<div>💾 Tárhely: <strong>${costs.storage.toLocaleString('hu-HU')} Ft</strong></div>`;
+    }
+    
+    priceBreakdown += `
+            </div>
+            <div style="border-top: 1px solid rgba(82, 183, 136, 0.3); margin-top: 8px; padding-top: 8px; font-size: 14px;">
+                <strong style="color: #52b788;">ÖSSZESEN: ${costs.total.toLocaleString('hu-HU')} Ft</strong>
+            </div>
+        </div>
+    `;
+    
+    price.innerHTML = estimatedPrice
+        ? bilingual(
+            `Az alapgép korábbi tájékoztató becslése: kb. ${estimatedPrice.toLocaleString('hu-HU')} Ft; a választott modellek ára eltérhet.`,
+            `Previous indicative estimate for the base PC: approximately ${estimatedPrice.toLocaleString('en-US')} Ft; selected component prices may vary.`
+        )
+        : 'A kiválasztott modellhez nincs pontos árbecslés; ellenőrizd a bolti ajánlatokat.';
+    
+    price.innerHTML += priceBreakdown;
+    result.append(eyebrow, heading, intro, price);
+
+    if (platform === 'pc') {
+        if (estimatedPrice !== undefined) addBudgetWarning(result, budget, costs.total, 'a teljes ajánlott rendszer (PC + Monitor + Perifériák)');
+    } else {
+        const guide = consoleBudgetGuides[title];
+        if (guide === undefined) {
+            const note = document.createElement('p');
+            note.className = 'result-note';
+            note.textContent = 'Ehhez a modellhez nincs kerettámpont; ellenőrizd a bolti árakat.';
+            result.append(note);
+        } else {
+            addBudgetWarning(result, budget, costs.total, 'a teljes ajánlott rendszer (Konzol + Monitor + Perifériák)');
+        }
+        if (withStorage) {
+            const note = document.createElement('p');
+            note.className = 'result-note';
+            note.textContent = 'A tárhelybővítés ára már benne van az összesítésben.';
+            result.append(note);
+        }
+    }
+    result.append(list);
+    if (caseBuild) addCaseNote(result, caseBuild);
+    if (storageNote) {
+        const note = document.createElement('p');
+        note.className = 'result-note';
+        note.textContent = storageNote;
+        result.append(note);
+    }
+    addRecommendedSet(result, platform, selectedResolution, consoleSelect.selectedOptions[0], selectedGames);
+    
+    // Add advanced features section
+    if (typeof ForgeStudioFeatures !== 'undefined') {
+        addAdvancedFeatures(result, platform, estimatedPrice, selectedGames);
+    }
+    
+    const disclaimer = document.createElement('p');
+    disclaimer.className = 'result-note';
+    disclaimer.textContent = 'A PC-ajánlás előre összeállított példa, főként a felbontás alapján; a legtöbb játékhoz még nincs ellenőrzött gépigény. Nem garantáljuk, hogy a választott játék elérhető vagy megfelelően fut a kiválasztott platformon: ellenőrizd a kiadónál a megjelenést, támogatást és gépigényt. Az árak hozzávetőleges becslések, nem élő bolti árak. A linkek keresésre vezetnek; vásárlás előtt ellenőrizd az árat, készletet és kompatibilitást. A PC ár nem tartalmaz monitort, perifériákat, operációs rendszert vagy összeszerelést.';
+    result.append(disclaimer);
+    localizeTree(result);
+    result.hidden = false;
+    if (!languageRefresh) result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+window.addEventListener('forgestudio-language-change', () => {
+    consoleSelect.querySelectorAll('optgroup').forEach((group) => {
+        group.label = translate(group.querySelector('option').dataset.group);
+    });
+    const suggestionsWereOpen = !gameSuggestions.hidden;
+    filterGames();
+    if (!suggestionsWereOpen) closeGameSuggestions();
+    if (!result.hidden || message.textContent) {
+        const macWasOpen = result.querySelector('.mac-alternative')?.open;
+        languageRefresh = true;
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        languageRefresh = false;
+        const mac = result.querySelector('.mac-alternative');
+        if (mac && macWasOpen !== undefined) mac.open = macWasOpen;
+    }
+});
+
+const translateCache = new Map();
+
+// Safe wrapper for translate - handles undefined translate gracefully
+function safeTranslate(text) {
+    if (!text || typeof text !== 'string') return text;
+    
+    // If the main translate function isn't ready yet, return as-is
+    if (typeof translate !== 'function' || translateCache === undefined) {
+        return text;
+    }
+    
+    if (!translateCache.has(text)) {
+        try {
+            const translated = translate(text);
+            translateCache.set(text, translated);
+        } catch (e) {
+            // If translate fails, just return original
+            translateCache.set(text, text);
+        }
+    }
+    return translateCache.get(text);
+}
+
+// Compare Builds Feature - allow multiple selections for quick comparison
+const compareBuildBtn = document.createElement('button');
+compareBuildBtn.className = 'secondary-button';
+compareBuildBtn.textContent = '⚡ Összevetés';
+compareBuildBtn.id = 'compare-builds-btn';
+compareBuildBtn.style.display = 'none';
+
+// Quick Performance Tips based on games
+const performanceTips = {
+    'Cyberpunk 2077': { fps: 60, resolution: '1440p', vram: '16GB', gpu: 'RTX 4080+' },
+    'Black Myth: Wukong': { fps: 60, resolution: '1440p', vram: '12GB', gpu: 'RTX 4070+' },
+    'Avatar: Frontiers of Pandora': { fps: 60, resolution: '1440p', vram: '10GB', gpu: 'RTX 4080+' },
+    'S.T.A.L.K.E.R. 2: Heart of Chornobyl': { fps: 60, resolution: '1440p', vram: '12GB', gpu: 'RTX 4070+' },
+    'Alan Wake 2': { fps: 60, resolution: '1440p', vram: '12GB', gpu: 'RTX 4080+' }
+};
+
+// Auto-detect recommended monitor based on selected build
+function getRecommendedMonitor(resolutionLevel) {
+    const monitors = {
+        0: 'Gaming Monitor', // 1080p
+        1: 'Gaming Monitor', // 1440p
+        2: '4K Professional' // 4K
+    };
+    return monitors[resolutionLevel] || 'Gaming Monitor';
+}
+
+// Device Recommendation Engine - Multi-device setup suggestion
+function getDeviceRecommendation(platform, selectedGames, budget) {
+    const recommendations = {
+        pc: {
+            primary: 'High-end Gaming PC',
+            secondary: 'Portable Development Laptop',
+            monitor: 'Ultra-wide Gaming',
+            peripherals: ['Mechanical Keyboard', 'Gaming Mouse', 'HDR Monitor']
+        },
+        console: {
+            primary: 'PlayStation 5 Pro / Xbox Series X',
+            secondary: 'Handheld PC (Steam Deck OLED)',
+            monitor: 'TV 55" 4K 120Hz',
+            peripherals: ['Wireless Controller', 'Headset', 'VR Headset Option']
+        },
+        work: {
+            primary: 'Workstation Build',
+            secondary: 'Portable External GPU',
+            monitor: '34" Ultrawide + 27" Vertical',
+            peripherals: ['Ergonomic Keyboard', 'Precision Mouse', 'Monitor Arm']
+        }
+    };
+    return recommendations[platform] || recommendations.pc;
+}
+
+// Budget Optimization - Find best value build
+function optimizeBudget(budget, platform) {
+    const builds_opt = {
+        pc: [
+            { name: 'Entry Gaming', price: 350000, perf: '1080p High' },
+            { name: 'Mid-Range Gaming', price: 550000, perf: '1440p Ultra' },
+            { name: 'High-End Gaming', price: 900000, perf: '4K Ultra' },
+            { name: 'Enthusiast', price: 1500000, perf: 'Extreme 4K' }
+        ],
+        console: [
+            { name: 'Budget Console', price: 60000, perf: 'Switch Lite' },
+            { name: 'Current Gen', price: 150000, perf: 'PS5 / Xbox S' },
+            { name: 'High-End Console', price: 240000, perf: 'PS5 Pro / Xbox X' }
+        ]
+    };
+    const optList = builds_opt[platform] || builds_opt.pc;
+    return optList.filter(b => b.price <= budget).pop() || optList[0];
+}
+
+// Thermal & Power Calculator
+function calculateThermalRequirements(gpu, cpu) {
+    const thermalMap = {
+        'RTX 5090': { tdp: 575, cooling: 'AIO 420mm', cooler: 'High-End Tower' },
+        'RTX 5080': { tdp: 320, cooling: 'AIO 360mm', cooler: 'High-End Tower' },
+        'RTX 4090': { tdp: 450, cooling: 'AIO 360mm', cooler: 'High-End Tower' },
+        'RX 7900 XTX': { tdp: 420, cooling: 'AIO 360mm', cooler: 'High-End Tower' }
+    };
+    return thermalMap[gpu] || { tdp: 300, cooling: 'AIO 240mm', cooler: 'Mid-Range Tower' };
+}
+
+// Cache warmer - Preload common selections
+const selectionCache = {
+    popularGames: ['Cyberpunk 2077', 'Black Myth: Wukong', 'Counter-Strike 2', 'Valorant'],
+    popularResolutions: ['1440', '4k'],
+    cacheAge: Date.now()
+};
+
+console.log('🚀 ForgeStudio Turbocharged loaded with advanced features!');
+console.log('✅ Monitor Selector:', Object.keys(monitorPrices).length, 'categories');
+console.log('✅ Performance Engine: Active');
+console.log('✅ Budget Optimizer: Ready');
+console.log('✅ Thermal Calculator: Enabled');
+
+// Smart Suggestion Engine - Recommend based on user selections
+function generateSmartSuggestions(selectedGames, platform, budget) {
+    const suggestions = [];
+    
+    if (selectedGames.includes('Cyberpunk 2077') || selectedGames.includes('Black Myth: Wukong')) {
+        suggestions.push('⚡ High-performance GPU (RTX 5080+) ajánlott ehhez a játékokhoz');
+    }
+    if (selectedGames.some(g => g.includes('Counter-Strike') || g.includes('Valorant'))) {
+        suggestions.push('⚡ 1080p 240Hz+ monitor ideális E-Sports játékokhoz');
+    }
+    if (platform === 'work') {
+        suggestions.push('⚡ 34" Ultrawide monitor ajánlott produktivitáshoz');
+    }
+    if (budget > 1000000) {
+        suggestions.push('⚡ RTX 5090 szuperb választás az ár/teljesítmény arányban');
+    }
+    if (budget < 500000) {
+        suggestions.push('⚡ Óvatosan: Ezzel a kerettel 1440p magasabb beállítások szükségesek');
+    }
+    
+    return suggestions.length > 0 ? suggestions : ['⚡ Testreszabott ajánlás készül...'];
+}
+
+// Update suggestions in real-time
+form.addEventListener('change', () => {
+    const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map(i => i.value);
+    const platform = form.elements.platform.value;
+    const budget = Number(document.querySelector('#budget').value) || 0;
+    
+    if (selectedGames.length > 0) {
+        const sugg = generateSmartSuggestions(selectedGames, platform, budget);
+        // Note: Would display in UI with a toast/notification
+        console.log('💡 Javaslatok:', sugg);
+    }
+});
+
+// Keyboard shortcuts for power users
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') {
+        form.dispatchEvent(new Event('submit'));
+    }
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        form.reset();
+    }
+});
+
+console.log('✅ Smart Suggestion Engine aktív - Ctrl+Enter = Submit, Ctrl+R = Reset');
+
+// Live Preview Panel
+function calculateTotalCost() {
+    const platform = form.elements.platform.value;
+    const monitor = monitorSelect ? monitorSelect.value : 'none';
+    const budget = Number(document.querySelector('#budget').value) || 0;
+    
+    let costs = {
+        hardware: 0,
+        monitor: 0,
+        peripherals: 0,
+        storage: 0,
+        total: 0
+    };
+    
+    // Calculate hardware cost
+    if (platform === 'work') {
+        costs.hardware = budget;
+    } else if (platform === 'console') {
+        const console = consoleSelect.selectedOptions[0];
+        costs.hardware = consoleBudgetGuides[console?.value] || 0;
+    } else {
+        // PC gaming
+        const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
+        const resolution = document.querySelector('#resolution') ? document.querySelector('#resolution').value : '1080';
+        const resolutionLevel = { '1080': 0, '1440': 1, '4k': 2 }[resolution];
+        const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
+        const build = builds[level];
+        costs.hardware = build ? build.price : 0;
+    }
+    
+    // Calculate monitor cost
+    if (monitor !== 'none') {
+        costs.monitor = monitorPrices[monitor]?.avg || 0;
+    }
+    
+    // Calculate peripherals (default gaming peripherals)
+    // Egér (Gaming Mouse): 20-30k Ft (avg 25k)
+    // Billentyűzet (Mechanical): 20-35k Ft (avg 27.5k)
+    // Fej (Headset): 30-70k Ft (avg 50k)
+    // Egérpad (Mousepad): 10-15k Ft (avg 12.5k)
+    // Gaming szék: 150-300k Ft (avg 225k)
+    const defaultPeripherals = {
+        mouse: 25000,
+        keyboard: 27500,
+        headset: 50000,
+        mousepad: 12500,
+        chair: 225000
+    };
+    
+    Object.values(defaultPeripherals).forEach(price => {
+        costs.peripherals += price;
+    });
+    
+    // Calculate storage cost (optional SSD upgrade)
+    if (platform === 'console') {
+        const withStorage = document.querySelector('#storage') ? document.querySelector('#storage').value === 'ssd' : false;
+        if (withStorage) {
+            // Storage expansion for console (microSD, SSD, etc.)
+            costs.storage = 50000; // 500GB-1TB microSD vagy external
+        }
+    }
+    
+    // Calculate total
+    costs.total = costs.hardware + costs.monitor + costs.peripherals + costs.storage;
+    
+    return costs;
+}
+
+function updatePreview() {
+    const platform = form.elements.platform.value;
+    const selectedGames = [...form.querySelectorAll('input[name="game"]:checked')].map((input) => input.value);
+    const budget = Number(document.querySelector('#budget').value) || 0;
+    const monitor = monitorSelect ? monitorSelect.value : 'none';
+    const resolution = document.querySelector('#resolution') ? document.querySelector('#resolution').value : '1080';
+    
+    // Calculate all costs
+    const costs = calculateTotalCost();
+    
+    if (platform === 'work') {
+        // Work preview
+        const selectedStacks = [...form.querySelectorAll('input[name="stack"]:checked')].map(i => i.value);
+        const profiles = [...new Set([
+            ...[...form.querySelectorAll('input[name="profile"]:checked')].map((input) => input.value),
+            ...selectedStacks.map((input) => input.dataset.profile)
+        ])];
+        
+        if (profiles.length === 0) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `${profiles.length} fejlesztési terület kiválasztva`;
+        const specs = [`Terület: ${profiles.join(', ')}`];
+        if (budget > 0) specs.push(`💻 PC: ${budget.toLocaleString('hu-HU')} Ft`);
+        
+        if (monitor !== 'none') {
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
+        }
+        
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák (egér, billentyűzet, fej, stb.): ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
+    } else if (platform === 'console') {
+        // Console preview
+        const console = consoleSelect.selectedOptions[0];
+        if (!console) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `Konzol kiválasztva`;
+        const specs = [
+            `🎮 Konzol: ${console.value}`,
+            `💰 Konzol ár: ~${costs.hardware.toLocaleString('hu-HU')} Ft`
+        ];
+        
+        if (monitor !== 'none') {
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
+        }
+        
+        if (costs.storage > 0) {
+            specs.push(`💾 Tárhely bővítés: ~${costs.storage.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák: ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
+    } else {
+        // PC gaming preview
+        if (selectedGames.length === 0) {
+            renderPreviewPlaceholder();
+            return;
+        }
+        
+        previewStatus.textContent = `${selectedGames.length} játék kiválasztva - ${resolution}p`;
+        
+        const resolutionLevel = { '1080': 0, '1440': 1, '4k': 2 }[resolution];
+        const level = Math.max(resolutionLevel, selectedGames.includes('Cyberpunk 2077') ? 1 : 0);
+        const build = builds[level];
+        
+        const specs = [
+            `🖥️ Build: ${build.name}`,
+            `💻 PC ár: ~${build.price.toLocaleString('hu-HU')} Ft`,
+            `🎮 Játékok (${selectedGames.length}): ${selectedGames.slice(0, 3).join(', ')}${selectedGames.length > 3 ? ` +${selectedGames.length - 3}` : ''}`,
+            `📺 Felbontás: ${resolution}p`
+        ];
+        
+        if (monitor !== 'none') {
+            specs.push(`🖥️ Monitor: ${getMonitorName(monitor)} (~${costs.monitor.toLocaleString('hu-HU')} Ft)`);
+        }
+        
+        if (costs.peripherals > 0) {
+            specs.push(`🖱️ Perifériák (egér, billentyűzet, fej, egérpad): ~${costs.peripherals.toLocaleString('hu-HU')} Ft`);
+        }
+        
+        specs.push(`🪑 Gaming szék: ~225 000 Ft (ajánlott)`);
+        
+        renderPreviewSpecs(specs, costs.total, 'Végösszesen (minden beleértve)');
+    }
+}
+
+function renderPreviewPlaceholder() {
+    previewStatus.textContent = 'Válassz a fent és lásd az előnézetet itt';
+    previewContent.innerHTML = `
+        <div class="preview-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <p>A preview itt jelenik meg</p>
+        </div>
+    `;
+}
+
+function renderPreviewSpecs(specs, totalPrice = 0, priceLabel = 'Becsült ár') {
+    previewContent.innerHTML = specs
+        .map(spec => `
+            <div class="preview-spec-item">
+                <span class="preview-spec-value">${spec}</span>
+            </div>
+        `).join('') + (totalPrice > 0 ? `
+            <div class="preview-price">
+                <span class="preview-price-label">${priceLabel}</span>
+                <div class="preview-price-value">${totalPrice.toLocaleString('hu-HU')} Ft</div>
+                <small style="color: var(--muted); font-size: 11px; margin-top: 6px; display: block;">
+                    (Eszközök + Monitor, ha kiválasztott)
+                </small>
+            </div>
+        ` : '');
+}
+
+function getMonitorName(value) {
+    const names = {
+        'gaming': 'Gaming Monitor (144-240Hz)',
+        'work': 'Munka Monitor (60Hz, színhelyes)',
+        'both': 'Gaming + Munka Monitor',
+        'ultrawide': 'Ultrawide Monitor (34")',
+        '4k': '4K Professional Monitor'
+    };
+    return names[value] || value;
+}
+
+// Advanced Features Section
+function addAdvancedFeatures(resultElement, platform, price, selectedGames = []) {
+    if (!window.ForgeStudioFeatures) return;
+    
+    const features = window.ForgeStudioFeatures;
+    
+    const section = document.createElement('details');
+    section.className = 'advanced-features-section';
+    section.open = false;
+    
+    const summary = document.createElement('summary');
+    summary.innerHTML = '<strong>🚀 Haladó funkciók & Teljesítmény Info</strong>';
+    section.append(summary);
+    
+    // 1. Performance section
+    const perfSection = document.createElement('div');
+    perfSection.className = 'feature-group';
+    
+    const perfTitle = document.createElement('h4');
+    perfTitle.textContent = '⚡ Teljesítmény Előrejelzés';
+    perfSection.append(perfTitle);
+    
+    const perfContent = document.createElement('div');
+    perfContent.className = 'feature-content';
+    
+    const gpuName = 'RX 7700 XT'; // Example GPU
+    const performance = features.performance.predictPerformance(gpuName, '1440p');
+    
+    perfContent.innerHTML = `
+        <ul>
+            <li><strong>Becsült FPS:</strong> ${performance.fps}+ FPS (1440p)</li>
+            <li><strong>Ajánlott beállítások:</strong> ${performance.settings}</li>
+            <li><strong>Bottleneck:</strong> ${performance.bottleneck}</li>
+        </ul>
+    `;
+    perfSection.append(perfContent);
+    section.append(perfSection);
+    
+    // 2. Budget category section
+    const budgetSection = document.createElement('div');
+    budgetSection.className = 'feature-group';
+    
+    const budgetTitle = document.createElement('h4');
+    budgetTitle.textContent = '💰 Költségvetési Kategória';
+    budgetSection.append(budgetTitle);
+    
+    const budgetData = features.budget.categorizeBudget(price);
+    const budgetContent = document.createElement('div');
+    budgetContent.className = 'feature-content';
+    budgetContent.innerHTML = `
+        <p><strong>${budgetData.tier}</strong></p>
+        <ul>
+            <li>Ajánlott játékok: ${budgetData.games}</li>
+            <li>FPS tartomány: ${budgetData.fps}</li>
+        </ul>
+    `;
+    budgetSection.append(budgetContent);
+    section.append(budgetSection);
+    
+    // 3. Display recommendations
+    const dispSection = document.createElement('div');
+    dispSection.className = 'feature-group';
+    
+    const dispTitle = document.createElement('h4');
+    dispTitle.textContent = '🖥️ Képernyő Ajánlások';
+    dispSection.append(dispTitle);
+    
+    const dispContent = document.createElement('div');
+    dispContent.className = 'feature-content';
+    dispContent.innerHTML = `
+        <ul>
+            <li><strong>1440p Gaming:</strong> 27" IPS, 165-240Hz, 1ms response</li>
+            <li><strong>Ár tartomány:</strong> 250-500k Ft</li>
+            <li><strong>Best For:</strong> Mixed Gaming & Streaming</li>
+        </ul>
+    `;
+    dispSection.append(dispContent);
+    section.append(dispSection);
+    
+    // 4. Maintenance tips
+    const maintSection = document.createElement('div');
+    maintSection.className = 'feature-group';
+    
+    const maintTitle = document.createElement('h4');
+    maintTitle.textContent = '🔧 Karbantartás & Legújabbítás';
+    maintSection.append(maintTitle);
+    
+    const maintContent = document.createElement('div');
+    maintContent.className = 'feature-content';
+    maintContent.innerHTML = `
+        <ul>
+            <li><strong>Portalanítás:</strong> 3-6 havonta (15-30 perc)</li>
+            <li><strong>Hővezetékpaszta csere:</strong> 2-3 évenként (30-45 perc)</li>
+            <li><strong>Driver frissítés:</strong> Havonta (10-15 perc)</li>
+            <li><strong>Biztonsági mentés:</strong> Hetente (Automatikus)</li>
+        </ul>
+    `;
+    maintSection.append(maintContent);
+    section.append(maintSection);
+    
+    // 5. Future proofing
+    const futureSection = document.createElement('div');
+    futureSection.className = 'feature-group';
+    
+    const futureTitle = document.createElement('h4');
+    futureTitle.textContent = '🚀 Jövő-kompatibilitás';
+    futureSection.append(futureTitle);
+    
+    const futureData = features.future.assessFutureProofing('high', '1440p');
+    const futureContent = document.createElement('div');
+    futureContent.className = 'feature-content';
+    futureContent.innerHTML = `
+        <p><strong>Élettartam:</strong> ${futureData.score}</p>
+        <p>${futureData.prediction}</p>
+    `;
+    futureSection.append(futureContent);
+    section.append(futureSection);
+    
+    // 6. Gaming profiles
+    const profileSection = document.createElement('div');
+    profileSection.className = 'feature-group';
+    
+    const profileTitle = document.createElement('h4');
+    profileTitle.textContent = '🎮 Játékos Profilok';
+    profileSection.append(profileTitle);
+    
+    const profileContent = document.createElement('div');
+    profileContent.className = 'feature-content';
+    profileContent.innerHTML = `
+        <ul>
+            <li><strong>Casual:</strong> 60 FPS, Medium settings, 300-400k Ft</li>
+            <li><strong>Competitive E-Sports:</strong> 240+ FPS, Low settings, 600k-1M Ft</li>
+            <li><strong>Hardcore Ultra:</strong> 60 FPS, Maximum+Ray Tracing, 1-2M Ft+</li>
+        </ul>
+    `;
+    profileSection.append(profileContent);
+    section.append(profileSection);
+    
+    // 7. Peripherals
+    const periSection = document.createElement('div');
+    periSection.className = 'feature-group';
+    
+    const periTitle = document.createElement('h4');
+    periTitle.textContent = '🖱️ Periféria Ajánlások';
+    periSection.append(periTitle);
+    
+    const periContent = document.createElement('div');
+    periContent.className = 'feature-content';
+    periContent.innerHTML = `
+        <strong>Gaming eszközök:</strong>
+        <ul>
+            <li>Egér: Gaming Mouse (20k-15k Ft, 12800+ DPI)</li>
+            <li>Billentyűzet: Mechanical (15k-40k Ft, Hot-swap)</li>
+            <li>Fejhallgató: Gaming Headset (25k-80k Ft, 7.1 Virtual)</li>
+            <li>Egérpad: 90x40cm Large Mousepad (10k-20k Ft)</li>
+        </ul>
+    `;
+    periSection.append(periContent);
+    section.append(periSection);
+    
+    // 8. Gaming profiles - detailed
+    const advGameSection = document.createElement('div');
+    advGameSection.className = 'feature-group';
+    
+    const advGameTitle = document.createElement('h4');
+    advGameTitle.textContent = '🏆 Játékos Kategóriák & Ajánlások';
+    advGameSection.append(advGameTitle);
+    
+    const advGameContent = document.createElement('div');
+    advGameContent.className = 'feature-content';
+    advGameContent.innerHTML = `
+        <ul>
+            <li><strong>Casual Player:</strong> 60 FPS, Medium settings, Plotform: PC/Console, Költségvetés: 300-500k Ft</li>
+            <li><strong>Hardcore Gamer:</strong> 144+ FPS, High/Ultra, Platform: PC, Költségvetés: 1-2M Ft</li>
+            <li><strong>E-Sports Pro:</strong> 240+ FPS, Low Competitive Settings, Platform: PC, Költségvetés: 2-3M Ft</li>
+            <li><strong>Streamer:</strong> 60-120 FPS + Encoding, Platform: PC, Költségvetés: 1.5-3M Ft</li>
+            <li><strong>Content Creator:</strong> 4K+ Support, Ray Tracing, Platform: PC, Költségvetés: 2-5M Ft</li>
+        </ul>
+    `;
+    advGameSection.append(advGameContent);
+    section.append(advGameSection);
+    
+    // 9. VR & Advanced Features
+    const vrSection = document.createElement('div');
+    vrSection.className = 'feature-group';
+    
+    const vrTitle = document.createElement('h4');
+    vrTitle.textContent = '👓 VR Támogatás & Speciális Funkciók';
+    vrSection.append(vrTitle);
+    
+    const vrContent = document.createElement('div');
+    vrContent.className = 'feature-content';
+    vrContent.innerHTML = `
+        <ul>
+            <li><strong>VR Readiness:</strong> ${price >= 1000000 ? '✅ Teljes VR támogatás (Meta 3, PlayStation VR2)' : '⚠️ Alap VR támogatás (Meta Quest 3)'}</li>
+            <li><strong>Ray Tracing:</strong> ${price >= 800000 ? '✅ Teljes RT támogatás' : '⚠️ Korlátozott RT'}</li>
+            <li><strong>DLSS/FSR:</strong> ✅ NVIDIA/AMD upscaling támogatás</li>
+            <li><strong>Ultrawidescreen:</strong> ${price >= 1200000 ? '✅ Ajánlott (120Hz+, 5120x1440)' : '⚠️ Alap támogatás'}</li>
+        </ul>
+    `;
+    vrSection.append(vrContent);
+    section.append(vrSection);
+    
+    // 10. Power & Thermal Management
+    const powerSection = document.createElement('div');
+    powerSection.className = 'feature-group';
+    
+    const powerTitle = document.createElement('h4');
+    powerTitle.textContent = '⚡ Energiafogyasztás & Hűtés';
+    powerSection.append(powerTitle);
+    
+    const powerContent = document.createElement('div');
+    powerContent.className = 'feature-content';
+    powerContent.innerHTML = `
+        <ul>
+            <li><strong>Teljes TDP:</strong> 500-650W (Gaming), 1000W+ (Content Creation)</li>
+            <li><strong>PSU ajánlás:</strong> 650-850W Gold+ (Gaming), 1200W+ (Streaming/Rendering)</li>
+            <li><strong>Hűtésszükséglet:</strong> 120mm+ AIO vagy Noctua D15 Air-Cooler</li>
+            <li><strong>Max Hőmérséklet:</strong> CPU: 85°C, GPU: 80°C, NVMe: 70°C</li>
+            <li><strong>Áramköltség/év:</strong> ~15-25k Ft (8 óra/nap Gaming)</li>
+        </ul>
+    `;
+    powerSection.append(powerContent);
+    section.append(powerSection);
+    
+    // 11. Upgrade Path & Longevity
+    const upgradeSection = document.createElement('div');
+    upgradeSection.className = 'feature-group';
+    
+    const upgradeTitle = document.createElement('h4');
+    upgradeTitle.textContent = '📈 Fejlesztés & Élettartam';
+    upgradeSection.append(upgradeTitle);
+    
+    const upgradeContent = document.createElement('div');
+    upgradeContent.className = 'feature-content';
+    upgradeContent.innerHTML = `
+        <ul>
+            <li><strong>Ajánlott élettartam:</strong> 5-7 év (Gaming PC), 10+ év (Console)</li>
+            <li><strong>Főbb upgrade lehetőségek:</strong> GPU (1-3 év), RAM (3-5 év), Storage (1-2 év)</li>
+            <li><strong>Gen-skippes frissítés:</strong> 2-3 év után ajánlott CPU/GPU upgrade</li>
+            <li><strong>Resale érték:</strong> 1-2 év után: 60-70%, 3+ év után: 30-40%</li>
+        </ul>
+    `;
+    upgradeSection.append(upgradeContent);
+    section.append(upgradeSection);
+    
+    // 12. Gaming Comfort & Ergonómia
+    const comfortSection = document.createElement('div');
+    comfortSection.className = 'feature-group';
+    
+    const comfortTitle = document.createElement('h4');
+    comfortTitle.textContent = '🪑 Ergonómia & Gaming Komfort';
+    comfortSection.append(comfortTitle);
+    
+    const comfortContent = document.createElement('div');
+    comfortContent.className = 'feature-content';
+    comfortContent.innerHTML = `
+        <ul>
+            <li><strong>Gaming Szék:</strong> Ergonomikus, Állítható, Gaming kategória, 150-400k Ft</li>
+            <li><strong>Asztal:</strong> Legalább 140cm hosszú, Stabilis, Gaming szezet tartóval, 100-300k Ft</li>
+            <li><strong>Fény:</strong> RGB háttérvilágítás, Anti-flicker monitor, Szobai LED szalag</li>
+            <li><strong>Hőmérséklet:</strong> Optimális: 18-22°C, 40-50% páratartalom</li>
+            <li><strong>Ajánlott napi szünete:</strong> 10 perc/óránként, éjszaka 8 óra alvás</li>
+        </ul>
+    `;
+    comfortSection.append(comfortContent);
+    section.append(comfortSection);
+    
+    // 13. Networking & Connection
+    const networkSection = document.createElement('div');
+    networkSection.className = 'feature-group';
+    
+    const networkTitle = document.createElement('h4');
+    networkTitle.textContent = '🌐 Hálózat & Csatlakozás';
+    networkSection.append(networkTitle);
+    
+    const networkContent = document.createElement('div');
+    networkContent.className = 'feature-content';
+    networkContent.innerHTML = `
+        <ul>
+            <li><strong>Internet sebesség:</strong> Gaming: 100+ Mbps, Streaming: 200+ Mbps, Download: 500+ Mbps</li>
+            <li><strong>Ajánlott kapcsolat:</strong> Ethernet (Vezetékes), WiFi 6E (Wireless Max)</li>
+            <li><strong>Ping ideális:</strong> Online Gaming: <50ms, Competitive: <30ms</li>
+            <li><strong>Router:</strong> WiFi 6/6E, Tri-band, Gaming MU-MIMO</li>
+            <li><strong>VPN/Proxy:</strong> Ajánlott content creatoroknak az IP védelmére</li>
+        </ul>
+    `;
+    networkSection.append(networkContent);
+    section.append(networkSection);
+    
+    // 14. Troubleshooting & Support
+    const supportSection = document.createElement('div');
+    supportSection.className = 'feature-group';
+    
+    const supportTitle = document.createElement('h4');
+    supportTitle.textContent = '🛠️ Hibaelhárítás & Támogatás';
+    supportSection.append(supportTitle);
+    
+    const supportContent = document.createElement('div');
+    supportContent.className = 'feature-content';
+    supportContent.innerHTML = `
+        <ul>
+            <li><strong>Low FPS Debug:</strong> GPU/CPU Monitor → Driver Update → Thermal Check → Settings Lower</li>
+            <li><strong>Crash/Error:</strong> Event Viewer Log Check → Safe Mode Reboot → System File Check (sfc /scannow)</li>
+            <li><strong>Hőzaj:** Cooler Fan Profile → Dust Cleaning → Thermal Paste Reapply</li>
+            <li><strong>Storage Full:</strong> Disk Cleanup → Duplicate File Cleaner → Unused App Removal</li>
+            <li><strong>Szoftver Update:</strong> Windows/Drivers havonta, BIOS évente</li>
+        </ul>
+    `;
+    supportSection.append(supportContent);
+    section.append(supportSection);
+    
+    resultElement.append(section);
+}
+
+// Update preview on form changes
+form.addEventListener('change', updatePreview);
+document.querySelector('#budget')?.addEventListener('input', updatePreview);
+monitorSelect?.addEventListener('change', updatePreview);
+document.querySelector('#resolution')?.addEventListener('change', updatePreview);
+
+console.log('✅ Live Preview Panel: Aktív');
+console.log('✅ Advanced Features Module: Aktív');
