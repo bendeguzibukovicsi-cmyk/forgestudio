@@ -608,6 +608,21 @@ function closeGameSuggestions() {
 function filterGames() {
     const query = gameSearch.value.trim().toLocaleLowerCase('hu');
     
+    // Csak akkor render a játékokat, ha van keresési szöveg
+    if (!query) {
+        gameGrid.replaceChildren();
+        gameSuggestions.replaceChildren();
+        activeSuggestion = -1;
+        gameSearch.removeAttribute('aria-activedescendant');
+        
+        // Frissítsd a számlálókat
+        const count = document.querySelector('#game-count');
+        if (count) {
+            count.textContent = '';
+        }
+        return;
+    }
+    
     // Render cards based on search query - this populates gameIndexMap
     renderGameCards(query);
     
